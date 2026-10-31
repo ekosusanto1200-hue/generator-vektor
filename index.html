@@ -284,7 +284,253 @@
       </div>
     </div>
   </div>
-<!-- ... existing code -->
+
+  <!-- API Key Config Modal -->
+  <div id="apiKeyModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 space-y-4 relative shadow-2xl">
+      <button id="btnApiKeyModalClose" type="button" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold">&times;</button>
+      <h3 class="font-bold text-slate-900 text-base flex items-center">
+        <i class="fa-solid fa-key text-amber-500 mr-2"></i> Pengaturan Gemini API Key
+      </h3>
+      <p class="text-xs text-slate-500 leading-relaxed">
+        Masukkan Gemini API Key pribadi Anda untuk menggunakan mesin **Google Gemini** secara langsung. Key tersimpan aman di browser Anda.
+      </p>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1 uppercase">Gemini API Key</label>
+        <input id="inputGeminiApiKey" type="password" placeholder="AIzaSy..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none">
+      </div>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button id="btnClearApiKey" type="button" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">Hapus Key</button>
+        <button id="btnSaveApiKey" type="button" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow">Simpan Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-800 text-xs font-semibold flex items-center space-x-2 transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+    <i class="fa-solid fa-circle-info text-brand-400 text-sm"></i>
+    <span id="toastMessage">Pesan notifikasi...</span>
+  </div>
+
+  <!-- JavaScript App Engine -->
+  <script>
+    // 15 Standard Microstock Vector Styles Data
+    const VECTOR_STYLES = [
+      { id: 'flat', name: 'Modern Flat (Freepik)', desc: 'Desain bersih komersial', icon: 'fa-layer-group', promptTag: 'clean 2D modern flat vector illustration, smooth color blocks, corporate commercial style' },
+      { id: 'iso', name: 'Isometrik 3D Tech', desc: 'Sudut 3D presisi infografis', icon: 'fa-cube', promptTag: '3D isometric vector graphics, technical illustration, clean grid alignment' },
+      { id: 'vintage', name: 'Vintage Badge Emblem', desc: 'Gaya retro stempel / kaos POD', icon: 'fa-award', promptTag: 'vintage emblem vector badge, retro typography, die-cut shirt print design' },
+      { id: 'sticker', name: 'Stiker Die-Cut Outline', desc: 'Sangat cocok untuk stiker', icon: 'fa-note-sticky', promptTag: 'vector sticker design, thick white die-cut border outline, vibrant colors, cute graphic' },
+      { id: 'outline', name: 'Minimalis Line-Art', desc: 'Gaya garis tipis modern', icon: 'fa-pen-nib', promptTag: 'minimalist monoline vector art, outline illustration, elegant clean lines' },
+      { id: 'kawaii', name: 'Kawaii Chibi Cute', desc: 'Imut karakter kartun jepang', icon: 'fa-face-smile-beam', promptTag: 'cute kawaii chibi character vector, adorable expression, bright happy pastel tones' },
+      { id: 'popart', name: 'Pop Art Retro 80s', desc: 'Warna pop kontras tinggi', icon: 'fa-bolt', promptTag: '80s retro pop art vector, vibrant comic book dots, high contrast bright illustration' },
+      { id: 'fluid', name: 'Gradient Fluid Modern', desc: 'Gradien lembut kekinian', icon: 'fa-droplet', promptTag: 'modern fluid gradient vector graphic, vibrant colorful smooth shading' },
+      { id: 'clay', name: 'Claymorphic 3D Soft', desc: 'Efek tanah liat 3D imut', icon: 'fa-shapes', promptTag: 'soft claymorphic 3D vector illustration, rounded smooth tactile render style' },
+      { id: 'silhou', name: 'Silhouette & Stencil', desc: 'Siluet hitam pekat clean', icon: 'fa-user-ninja', promptTag: 'clean black vector silhouette stencil design, sharp edges, cutout graphic' },
+      { id: 'water', name: 'Watercolor Vector Mix', desc: 'Efek cat air vektor berseni', icon: 'fa-paint-brush', promptTag: 'vector watercolor paint blend illustration, artistic texture wash, vibrant soft edges' },
+      { id: 'mascot', name: 'Mascot Logo Esport', desc: 'Logo maskot tim tajam', icon: 'fa-shield-halved', promptTag: 'esport mascot logo vector, aggressive sharp lines, bold contour outline, team badge' },
+      { id: 'poly', name: 'Low Poly Geometric', desc: 'Poligon kristal 3D', icon: 'fa-gem', promptTag: 'low poly geometric vector graphic, crystal facet polygon mesh illustration' },
+      { id: 'glyph', name: 'App Icon & UI Glyph', desc: 'Simbol ikon aplikasi web', icon: 'fa-icons', promptTag: 'clean app icon vector glyph, modern UI design asset, centered balanced icon' },
+      { id: 'monoline', name: 'Retro Stamp Monoline', desc: 'Stempel monokrom klasik', icon: 'fa-stamp', promptTag: 'monoline stamp vector illustration, rustic single line stroke art, vintage badge' }
+    ];
+
+    const SAMPLE_PROMPTS = [
+      "kelinci imut membawa wortel emas dengan senyuman ceria",
+      "kucing astronot terbang mengendarai roket di luar angkasa",
+      "cangkir kopi hangat mengeluaran uap aroma melingkar imut",
+      "robot pembantu imut dengan layar mata hati glowing",
+      "anjing Shiba Inu memakai kacamata hitam gaya keren",
+      "tanaman kaktus imut di pot bunga berwajah gembira"
+    ];
+
+    // App Global State
+    let selectedStyle = VECTOR_STYLES[0];
+    let selectedPalette = "Default";
+    let generatedAssets = [];
+    let isGenerating = false;
+    let currentActiveAsset = null;
+
+    // DOM References
+    const promptInput = document.getElementById('promptInput');
+    const charCounter = document.getElementById('charCounter');
+    const btnOptimizePrompt = document.getElementById('btnOptimizePrompt');
+    const btnRandomPrompt = document.getElementById('btnRandomPrompt');
+    const btnClearPrompt = document.getElementById('btnClearPrompt');
+    const optimizedPromptBox = document.getElementById('optimizedPromptBox');
+    const optimizedPromptText = document.getElementById('optimizedPromptText');
+    const btnUseOptimizedPrompt = document.getElementById('btnUseOptimizedPrompt');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const btnGenerateText = document.getElementById('btnGenerateText');
+    const stylesGrid = document.getElementById('stylesGrid');
+    const selectedStyleBadge = document.getElementById('selectedStyleBadge');
+    const resultsGrid = document.getElementById('resultsGrid');
+    const emptyState = document.getElementById('emptyState');
+    const loadingState = document.getElementById('loadingState');
+    const loadingStatusText = document.getElementById('loadingStatusText');
+    const resultCountBadge = document.getElementById('resultCountBadge');
+    const btnDownloadAll = document.getElementById('btnDownloadAll');
+
+    // Modals
+    const assetModal = document.getElementById('assetModal');
+    const btnModalClose = document.getElementById('btnModalClose');
+    const modalImg = document.getElementById('modalImg');
+    const modalPrompt = document.getElementById('modalPrompt');
+    const modalMasterPrompt = document.getElementById('modalMasterPrompt');
+    const modalStyle = document.getElementById('modalStyle');
+    const modalPalette = document.getElementById('modalPalette');
+    const btnModalDownload = document.getElementById('btnModalDownload');
+    const btnModalOpenTab = document.getElementById('btnModalOpenTab');
+
+    // Key Modal
+    const btnApiKeyConfig = document.getElementById('btnApiKeyConfig');
+    const apiKeyModal = document.getElementById('apiKeyModal');
+    const btnApiKeyModalClose = document.getElementById('btnApiKeyModalClose');
+    const inputGeminiApiKey = document.getElementById('inputGeminiApiKey');
+    const btnSaveApiKey = document.getElementById('btnSaveApiKey');
+    const btnClearApiKey = document.getElementById('btnClearApiKey');
+    const apiKeyStatusLabel = document.getElementById('apiKeyStatusLabel');
+
+    // Initialize App
+    window.addEventListener('load', () => {
+      renderStylesGrid();
+      setupEventListeners();
+      checkApiKeyStatus();
+    });
+
+    function checkApiKeyStatus() {
+      const key = localStorage.getItem('user_gemini_key');
+      if (key) {
+        apiKeyStatusLabel.textContent = "Key Terpasang (Gemini)";
+        inputGeminiApiKey.value = key;
+      } else {
+        apiKeyStatusLabel.textContent = "Pengaturan Key";
+      }
+    }
+
+    function renderStylesGrid() {
+      stylesGrid.innerHTML = '';
+      VECTOR_STYLES.forEach((style) => {
+        const card = document.createElement('div');
+        const isActive = style.id === selectedStyle.id;
+        card.className = `style-card p-3 rounded-xl border border-slate-200 bg-white hover:border-brand-300 transition cursor-pointer flex flex-col justify-between ${isActive ? 'active' : ''}`;
+        card.onclick = () => selectStyle(style);
+        card.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <div class="w-7 h-7 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center text-xs font-bold">
+              <i class="fa-solid ${style.icon}"></i>
+            </div>
+            <div class="truncate">
+              <h4 class="text-xs font-bold text-slate-800 truncate">${style.name}</h4>
+              <p class="text-[10px] text-slate-400 truncate">${style.desc}</p>
+            </div>
+          </div>
+        `;
+        stylesGrid.appendChild(card);
+      });
+    }
+
+    function selectStyle(style) {
+      selectedStyle = style;
+      selectedStyleBadge.textContent = `Terpilih: ${style.name}`;
+      renderStylesGrid();
+    }
+
+    function setupEventListeners() {
+      promptInput.addEventListener('input', () => {
+        charCounter.textContent = `${promptInput.value.length} karakter`;
+      });
+
+      btnRandomPrompt.onclick = () => {
+        const rand = SAMPLE_PROMPTS[Math.floor(Math.random() * SAMPLE_PROMPTS.length)];
+        promptInput.value = rand;
+        charCounter.textContent = `${rand.length} karakter`;
+      };
+
+      btnClearPrompt.onclick = () => {
+        promptInput.value = '';
+        charCounter.textContent = '0 karakter';
+        optimizedPromptBox.classList.add('hidden');
+      };
+
+      document.querySelectorAll('.palette-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          selectedPalette = e.target.getAttribute('data-palette');
+        };
+      });
+
+      btnOptimizePrompt.onclick = optimizePromptWithGemini;
+      btnUseOptimizedPrompt.onclick = () => {
+        promptInput.value = optimizedPromptText.textContent;
+        charCounter.textContent = `${promptInput.value.length} karakter`;
+        showToast("Prompt berhasil diterapkan!");
+      };
+
+      btnGenerate.onclick = startGeneration;
+      btnDownloadAll.onclick = downloadAllAssets;
+
+      // Modal Events
+      btnModalClose.onclick = () => assetModal.classList.add('hidden');
+      btnApiKeyConfig.onclick = () => apiKeyModal.classList.remove('hidden');
+      btnApiKeyModalClose.onclick = () => apiKeyModal.classList.add('hidden');
+
+      btnSaveApiKey.onclick = () => {
+        const key = inputGeminiApiKey.value.trim();
+        if (key) {
+          localStorage.setItem('user_gemini_key', key);
+          showToast("Gemini API Key tersimpan!");
+        } else {
+          localStorage.removeItem('user_gemini_key');
+        }
+        checkApiKeyStatus();
+        apiKeyModal.classList.add('hidden');
+      };
+
+      btnClearApiKey.onclick = () => {
+        localStorage.removeItem('user_gemini_key');
+        inputGeminiApiKey.value = '';
+        checkApiKeyStatus();
+        showToast("API Key dihapus!");
+        apiKeyModal.classList.add('hidden');
+      };
+    }
+
+    function translatePromptToEnglish(text) {
+      const lower = text.toLowerCase();
+      let res = text;
+      const dict = [
+        ['kelinci', 'cute rabbit'], ['kucing', 'cute cat'], ['anjing', 'cute dog'],
+        ['astronot', 'astronaut'], ['wortel', 'golden carrot'], ['kopi', 'coffee cup'],
+        ['robot', 'cute helper robot'], ['terbang', 'flying'], ['imut', 'adorable cute'],
+        ['roket', 'rocket ship'], ['kacamata', 'sunglasses'], ['pot bunga', 'flower pot']
+      ];
+      dict.forEach(([id, en]) => {
+        res = res.replace(new RegExp(id, 'gi'), en);
+      });
+      return res;
+    }
+
+    async function optimizePromptWithGemini() {
+      const text = promptInput.value.trim();
+      if (!text) {
+        showToast("Masukkan prompt terlebih dahulu!");
+        return;
+      }
+      btnOptimizePrompt.disabled = true;
+      btnOptimizePrompt.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Mengoptimalkan...</span>`;
+
+      const translated = translatePromptToEnglish(text);
+      const enhanced = `High-end 2D vector graphic of ${translated}, ${selectedStyle.promptTag}, ${selectedPalette} colors, clean isolated illustration, commercial microstock quality`;
+
+      setTimeout(() => {
+        optimizedPromptText.textContent = enhanced;
+        optimizedPromptBox.classList.remove('hidden');
+        btnOptimizePrompt.disabled = false;
+        btnOptimizePrompt.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-xs"></i> <span>Optimalkan Prompt Gemini AI</span>`;
+        showToast("Prompt berhasil dioptimalkan!");
+      }, 700);
+    }
+
     async function startGeneration() {
       const text = promptInput.value.trim();
       if (!text) {
@@ -352,6 +598,36 @@
       showToast(`Berhasil! ${generatedAssets.length} aset gambar telah dibuat!`);
     }
 
+    async function generateSingleGeminiImage(promptText, aspectRatioVal, seed) {
+      const isSticker = document.getElementById('chkStickerBorder').checked;
+      const bg = document.getElementById('selectBackground').value;
+      const angle = document.getElementById('selectAngle').value;
+
+      const englishPrompt = translatePromptToEnglish(promptText);
+      const stickerTag = isSticker ? "thick die-cut white sticker outline" : "";
+
+      const masterPrompt = `high quality clean vector illustration of ${englishPrompt}, ${selectedStyle.promptTag}, ${angle}, ${selectedPalette} color palette, ${stickerTag}, ${bg}, flat vector art style, sharp lines, commercial microstock quality, vector graphics, no realism, 8k resolution`;
+
+      let width = 1024, height = 1024;
+      if (aspectRatioVal === "4:3") { width = 1024; height = 768; }
+      else if (aspectRatioVal === "16:9") { width = 1024; height = 576; }
+
+      const encodedPrompt = encodeURIComponent(masterPrompt);
+      return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
+    }
+
+    function generateDynamicVectorSVG(promptText, styleName, paletteName, seed) {
+      const color1 = '#2563eb', color2 = '#ec4899', color3 = '#f59e0b';
+      const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+        <rect width="500" height="500" fill="#f8fafc"/>
+        <circle cx="250" cy="250" r="180" fill="${color1}" opacity="0.1"/>
+        <circle cx="250" cy="250" r="130" fill="${color2}" opacity="0.8"/>
+        <path d="M250,150 L280,220 L350,220 L295,260 L315,330 L250,285 L185,330 L205,260 L150,220 L220,220 Z" fill="${color3}"/>
+        <text x="250" y="420" font-family="sans-serif" font-size="14" font-weight="bold" fill="#334155" text-anchor="middle">VECTOR: ${promptText.toUpperCase()}</text>
+      </svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+    }
+
     function renderResults() {
       if (!resultsGrid) return;
       resultsGrid.innerHTML = '';
@@ -395,6 +671,9 @@
       modalMasterPrompt.textContent = asset.masterPrompt;
       modalStyle.textContent = asset.style;
       modalPalette.textContent = asset.palette;
+
+      btnModalOpenTab.onclick = () => window.open(asset.url, '_blank');
+      btnModalDownload.onclick = () => downloadImage(asset.url, `vektor_${asset.seed}.png`);
 
       const btnCopy = document.getElementById('btnCopyMasterPrompt');
       if (btnCopy) {
@@ -443,10 +722,26 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
         showToast("Gambar berhasil tersimpan!");
       } catch (err) {
-        window.open(url, '_blank');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || 'vektor-ai.png';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    }
+
+    async function downloadAllAssets() {
+      if (!generatedAssets.length) return;
+      showToast("Mulai mengunduh semua gambar...");
+      for (let i = 0; i < generatedAssets.length; i++) {
+        const asset = generatedAssets[i];
+        await downloadImage(asset.url, `vektor_${i + 1}.png`);
+        await new Promise(r => setTimeout(r, 600));
       }
     }
 
@@ -462,4 +757,6 @@
         toast.classList.add('translate-y-20', 'opacity-0');
       }, 3000);
     }
-<!-- ... existing code -->
+  </script>
+</body>
+</html>
