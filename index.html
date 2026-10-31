@@ -50,6 +50,10 @@
         </div>
       </div>
       <div class="flex items-center space-x-2">
+        <button id="btnApiKeyConfig" type="button" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition cursor-pointer">
+          <i class="fa-solid fa-key mr-1.5"></i>
+          <span id="apiKeyStatusLabel">Pengaturan Key</span>
+        </button>
         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
           <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
           Engine Active
@@ -139,13 +143,13 @@
       <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
         <div class="flex items-center justify-between">
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-            Pilihan Style Vektor <span class="text-slate-400 font-normal">(12 Opsi)</span>
+            Pilihan Style Vektor Standar Mikrostok <span class="text-slate-400 font-normal">(15 Kategori)</span>
           </label>
           <span id="selectedStyleBadge" class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-100">
-            Terpilih: Kawaii Imut
+            Terpilih: Modern Flat (Freepik)
           </span>
         </div>
-        <div id="stylesGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+        <div id="stylesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
           <!-- Populated by JavaScript -->
         </div>
       </div>
@@ -272,6 +276,26 @@
     </div>
   </div>
 
+  <!-- API Key Config Modal -->
+  <div id="apiKeyModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl relative border border-slate-100">
+      <button id="btnApiKeyClose" type="button" class="absolute top-4 right-4 w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold transition">
+        &times;
+      </button>
+      <div class="space-y-1">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center">
+          <i class="fa-solid fa-key text-amber-500 mr-2"></i> Gemini API Key (Opsional)
+        </h3>
+        <p class="text-[11px] text-slate-500">Masukkan API Key Gemini pribadi jika membuka situs dari GitHub Pages agar generasi gambar presisi 100%.</p>
+      </div>
+      <input id="inputUserApiKey" type="password" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="AIzaSy...">
+      <div class="flex space-x-2">
+        <button id="btnSaveApiKey" type="button" class="flex-1 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow transition">Simpan Key</button>
+        <button id="btnClearApiKey" type="button" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-xl transition">Hapus</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg transition-all duration-300 transform translate-y-20 opacity-0 flex items-center space-x-2">
     <i class="fa-solid fa-circle-info text-brand-400"></i>
@@ -281,18 +305,21 @@
   <!-- JavaScript Logic -->
   <script>
     const VECTOR_STYLES = [
-      { id: 'flat', name: 'Vektor Datar (Flat)', tag: 'VECTOR' },
-      { id: 'monoline', name: 'Vektor Monoline', tag: 'VECTOR' },
-      { id: 'kawaii', name: 'Kawaii Imut', tag: 'VECTOR', active: true },
-      { id: 'glossy3d', name: '3D Glossy', tag: 'VECTOR' },
-      { id: 'matte3d', name: '3D Matte', tag: 'VECTOR' },
-      { id: 'sticker', name: 'Stiker', tag: 'VECTOR' },
-      { id: 'isometric', name: 'Vektor Isometrik', tag: 'VECTOR' },
-      { id: 'lowpoly', name: 'Low Poly', tag: 'VECTOR' },
-      { id: 'lineart', name: 'Seni Garis (Line Art)', tag: 'VECTOR' },
-      { id: 'siluet', name: 'Siluet', tag: 'VECTOR' },
-      { id: 'emoji', name: 'Emoji', tag: 'VECTOR' },
-      { id: 'icon', name: 'Ikon', tag: 'VECTOR' }
+      { id: 'flat', name: 'Modern Flat (Freepik)', tag: 'MICROSTOCK', active: true },
+      { id: 'kawaii', name: 'Kawaii & Maskot Imut', tag: 'POD/STICKER' },
+      { id: 'isometric', name: 'Isometrik 3D Tech', tag: 'MICROSTOCK' },
+      { id: 'sticker', name: 'Stiker Die-Cut POD', tag: 'ETSY/POD' },
+      { id: 'monoline', name: 'Monoline & Line Art', tag: 'MINIMAL' },
+      { id: 'gradient', name: 'Gradien Fluid Modern', tag: 'UI/WEB' },
+      { id: 'badge', name: 'Vintage Badge Emblem', tag: 'POD/T-SHIRT' },
+      { id: 'corporate', name: 'Corporate & Business', tag: 'MICROSTOCK' },
+      { id: 'watercolor', name: 'Watercolor Vector Art', tag: 'CREATIVE' },
+      { id: 'papercut', name: 'Paper Cutout 3D', tag: 'TRENDING' },
+      { id: 'doodle', name: 'Hand-Drawn Doodle', tag: 'CASUAL' },
+      { id: 'siluet', name: 'Siluet Clean & Stencil', tag: 'CUTTING' },
+      { id: 'icon', name: 'App Icon & UI Glyph', tag: 'ASSET' },
+      { id: 'cyberpunk', name: 'Neon Synthwave', tag: 'GAMING' },
+      { id: 'clay3d', name: '3D Claymorphism', tag: 'TRENDING' }
     ];
 
     const SAMPLE_PROMPTS = [
@@ -338,37 +365,82 @@
     const btnModalDownload = document.getElementById('btnModalDownload');
     const btnModalOpenTab = document.getElementById('btnModalOpenTab');
 
+    // API Key Modal Elements
+    const btnApiKeyConfig = document.getElementById('btnApiKeyConfig');
+    const apiKeyModal = document.getElementById('apiKeyModal');
+    const btnApiKeyClose = document.getElementById('btnApiKeyClose');
+    const inputUserApiKey = document.getElementById('inputUserApiKey');
+    const btnSaveApiKey = document.getElementById('btnSaveApiKey');
+    const btnClearApiKey = document.getElementById('btnClearApiKey');
+    const apiKeyStatusLabel = document.getElementById('apiKeyStatusLabel');
+
     document.addEventListener('DOMContentLoaded', () => {
       renderStyles();
       setupEventListeners();
       promptInput.value = "kelinci imut membawa wortel segar dengan mata berbinar ceria";
       updateCharCount();
+
+      const savedKey = localStorage.getItem('user_gemini_key');
+      if (savedKey) {
+        inputUserApiKey.value = savedKey;
+        apiKeyStatusLabel.textContent = "Key Terpasang";
+      }
     });
 
     function renderStyles() {
+      if (!stylesGrid) return;
       stylesGrid.innerHTML = '';
       VECTOR_STYLES.forEach(style => {
-        const card = document.createElement('div');
-        const isActive = style.id === selectedStyle.id;
-        card.className = `style-card cursor-pointer border rounded-lg p-2 text-center transition-all relative flex flex-col justify-between bg-slate-50 hover:bg-white hover:shadow-sm ${
-          isActive ? 'active border-brand-500 bg-blue-50/50' : 'border-slate-200'
-        }`;
-        card.onclick = () => {
-          selectedStyle = style;
-          renderStyles();
-          selectedStyleBadge.textContent = `Terpilih: ${style.name}`;
-        };
-        card.innerHTML = `
-          <span class="active-dot absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 ${isActive ? 'block' : 'hidden'}"></span>
-          <div class="text-[11px] font-semibold text-slate-800 truncate mb-0.5">${style.name}</div>
-          <div class="text-[8px] font-bold text-slate-400 uppercase">${style.tag}</div>
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `style-card p-2.5 rounded-xl border border-slate-200 text-left transition flex flex-col justify-between hover:border-brand-300 hover:bg-slate-50 cursor-pointer ${style.active ? 'active' : ''}`;
+        btn.innerHTML = `
+          <span class="text-[9px] font-bold tracking-wider uppercase text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded w-max mb-1 border border-brand-100">${style.tag}</span>
+          <span class="text-xs font-bold text-slate-800 leading-tight">${style.name}</span>
         `;
-        stylesGrid.appendChild(card);
+        btn.onclick = () => {
+          document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active'));
+          btn.classList.add('active');
+          VECTOR_STYLES.forEach(s => s.active = false);
+          style.active = true;
+          selectedStyle = style;
+          if (selectedStyleBadge) {
+            selectedStyleBadge.textContent = `Terpilih: ${style.name}`;
+          }
+        };
+        stylesGrid.appendChild(btn);
       });
     }
 
     function setupEventListeners() {
       promptInput.addEventListener('input', updateCharCount);
+
+      // API Key Modal Listeners
+      if (btnApiKeyConfig) btnApiKeyConfig.addEventListener('click', () => apiKeyModal.classList.remove('hidden'));
+      if (btnApiKeyClose) btnApiKeyClose.addEventListener('click', () => apiKeyModal.classList.add('hidden'));
+      if (btnSaveApiKey) {
+        btnSaveApiKey.addEventListener('click', () => {
+          const val = inputUserApiKey.value.trim();
+          if (val) {
+            localStorage.setItem('user_gemini_key', val);
+            apiKeyStatusLabel.textContent = "Key Terpasang";
+            showToast("Gemini API Key tersimpan!");
+          } else {
+            localStorage.removeItem('user_gemini_key');
+            apiKeyStatusLabel.textContent = "Pengaturan Key";
+          }
+          apiKeyModal.classList.add('hidden');
+        });
+      }
+      if (btnClearApiKey) {
+        btnClearApiKey.addEventListener('click', () => {
+          inputUserApiKey.value = "";
+          localStorage.removeItem('user_gemini_key');
+          apiKeyStatusLabel.textContent = "Pengaturan Key";
+          showToast("API Key dihapus!");
+          apiKeyModal.classList.add('hidden');
+        });
+      }
 
       document.querySelectorAll('.palette-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -474,39 +546,37 @@
       optimizedPromptBox.classList.remove('hidden');
       showToast("Prompt dioptimalkan!");
     }
-
-    // Helper to generate dynamic SVG data URI as fallback
-    function generateDynamicVectorSVG(text, styleName, paletteName, index) {
-      const colors = {
-        'Pastel Imut': ['#fbcfe8', '#f472b6', '#ec4899', '#fef08a'],
-        'Vibrant Cerah': ['#38bdf8', '#fbbf24', '#f87171', '#4ade80'],
-        'Monokrom': ['#1e293b', '#475569', '#94a3b8', '#f8fafc'],
-        'Neon Cyberpunk': ['#c084fc', '#f43f5e', '#06b6d4', '#e0e7ff'],
-        'Earthy Tone': ['#059669', '#d97706', '#84cc16', '#fef3c7'],
-        'Default': ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd']
-      }[paletteName] || ['#2563eb', '#3b82f6', '#60a5fa', '#f3f4f6'];
-
-      const c1 = colors[0], c2 = colors[1], c3 = colors[2], c4 = colors[3];
-      const svgStr = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-        <rect width="512" height="512" rx="32" fill="#f8fafc"/>
-        <circle cx="256" cy="256" r="200" fill="${c1}" opacity="0.15"/>
-        <circle cx="256" cy="230" r="140" fill="${c2}" opacity="0.85"/>
-        <path d="M 180 340 Q 256 420 332 340 Z" fill="${c3}"/>
-        <circle cx="210" cy="210" r="22" fill="#ffffff"/>
-        <circle cx="302" cy="210" r="22" fill="#ffffff"/>
-        <circle cx="210" cy="210" r="10" fill="#0f172a"/>
-        <circle cx="302" cy="210" r="10" fill="#0f172a"/>
-        <path d="M 230 260 Q 256 280 282 260" stroke="#0f172a" stroke-width="6" stroke-linecap="round" fill="none"/>
-        <rect x="90" y="420" width="332" height="48" rx="24" fill="${c4}"/>
-        <text x="256" y="450" font-family="sans-serif" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="middle">${text.slice(0, 25)} (${index})</text>
-        <text x="256" y="70" font-family="sans-serif" font-size="14" font-weight="600" fill="${c1}" text-anchor="middle">${styleName.toUpperCase()}</text>
-      </svg>`;
-      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgStr);
+    function translatePromptToEnglish(str) {
+      let text = str.toLowerCase();
+      const dictionary = [
+        [/kelinci/g, 'rabbit'], [/imut/g, 'cute'], [/membawa/g, 'holding'], [/wortel/g, 'carrot'],
+        [/segar/g, 'fresh'], [/dengan/g, 'with'], [/mata/g, 'eyes'], [/berbinar/g, 'sparkling'],
+        [/ceria/g, 'cheerful'], [/kucing/g, 'cat'], [/astronot/g, 'astronaut'], [/lucu/g, 'cute'],
+        [/melayang/g, 'floating'], [/di luar angkasa/g, 'in space'], [/helm kaca/g, 'glass helmet'],
+        [/cangkir/g, 'cup'], [/kopi/g, 'coffee'], [/karakter/g, 'character'], [/kartun/g, 'cartoon'],
+        [/tersenyum/g, 'smiling'], [/memegang/g, 'holding'], [/donat/g, 'donut'], [/manis/g, 'sweet'],
+        [/anak anjing/g, 'puppy'], [/bermain/g, 'playing'], [/bola/g, 'ball'], [/di taman/g, 'in garden'],
+        [/bunga matahari/g, 'sunflower'], [/robot/g, 'robot'], [/kecil/g, 'small'], [/ramah/g, 'friendly'],
+        [/menyiram/g, 'watering'], [/tanaman/g, 'plants'], [/pot/g, 'pot']
+      ];
+      dictionary.forEach(([regex, replacement]) => {
+        text = text.replace(regex, replacement);
+      });
+      return text;
     }
 
-    async function generateSingleGeminiImage(fullPrompt, aspectRatioVal, seedOffset) {
-      const apiKey = "";
+    async function generateSingleGeminiImage(promptRaw, aspectRatioVal, seedOffset) {
+      const userKey = localStorage.getItem('user_gemini_key') || "";
+      const apiKey = userKey || "";
+      const englishPrompt = translatePromptToEnglish(promptRaw);
+      
+      const angle = document.getElementById('selectAngle').value;
+      const bg = document.getElementById('selectBackground').value;
+      const isSticker = document.getElementById('chkStickerBorder').checked;
+      const stickerTag = isSticker ? "thick white die-cut sticker outline" : "";
+      
+      const fullPrompt = `High quality 2D graphic vector illustration of ${englishPrompt}, ${selectedStyle.name} style, ${angle}, ${selectedPalette} palette, ${stickerTag}, ${bg}, clean sharp 2D vector art, stock graphic asset style, vibrant colors, no photo realism, vector icon illustration`;
+
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
       const payload = {
         contents: [{
@@ -519,30 +589,32 @@
         }
       };
 
-      try {
-        const res = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-        if (part && part.inlineData?.data) {
-          const mime = part.inlineData.mimeType || 'image/png';
-          return `data:${mime};base64,${part.inlineData.data}`;
+      if (apiKey) {
+        try {
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+          if (part && part.inlineData?.data) {
+            const mime = part.inlineData.mimeType || 'image/png';
+            return `data:${mime};base64,${part.inlineData.data}`;
+          }
+        } catch (e) {
+          console.warn("Gemini API call bypassed or unreachable, using fallback engine:", e);
         }
-      } catch (e) {
-        console.warn("Gemini API call bypassed or unreachable, using fallback engine:", e);
       }
 
-      // Secondary Pollinations Fallback
+      // Secondary Pollinations Fallback with accurate English vector prompt
       try {
         const currentSeed = Math.floor(Math.random() * 899999) + 100000 + seedOffset;
-        const encodedPrompt = encodeURIComponent(`${fullPrompt}, clean 2d vector graphic asset, seed ${seedOffset}`);
+        const encodedPrompt = encodeURIComponent(`2d vector graphic illustration of ${englishPrompt}, ${selectedStyle.name} style, ${selectedPalette} palette, clean flat design vector asset, isolated background, seed ${seedOffset}`);
         return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${currentSeed}&nologo=true&model=flux`;
       } catch (err) {
         // Tertiary Dynamic SVG Fallback
-        return generateDynamicVectorSVG(fullPrompt, selectedStyle.name, selectedPalette, seedOffset);
+        return generateDynamicVectorSVG(promptRaw, selectedStyle.name, selectedPalette, seedOffset);
       }
     }
 
@@ -650,47 +722,53 @@
       assetModal.classList.remove('hidden');
     }
 
+    // Helper konversi Data URL ke Blob biner
+    function dataURLtoBlob(dataurl) {
+      const arr = dataurl.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime });
+    }
+
+    // Fungsi pengunduhan langsung ke perangkat/HP
     async function downloadImage(url, filename) {
       showToast("Mengunduh gambar...");
       try {
+        let blobUrl;
+        
         if (url.startsWith('data:')) {
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = filename || 'gambar-vektor.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          showToast("Gambar berhasil diunduh!");
+          const blob = dataURLtoBlob(url);
+          blobUrl = URL.createObjectURL(blob);
         } else {
-          // Cross-origin image handling with Canvas Blob fallback
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth || 512;
-            canvas.height = img.naturalHeight || 512;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            try {
-              const dataUrl = canvas.toDataURL('image/png');
-              const a = document.createElement('a');
-              a.href = dataUrl;
-              a.download = filename || 'gambar-vektor.png';
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              showToast("Gambar berhasil diunduh!");
-            } catch (e) {
-              window.open(url, '_blank');
-            }
-          };
-          img.onerror = () => {
-            window.open(url, '_blank');
-          };
-          img.src = url;
+          // Ambil data gambar publik via fetch blob
+          const response = await fetch(url);
+          const blob = await response.blob();
+          blobUrl = URL.createObjectURL(blob);
         }
+
+        // Picu perintah simpan berkas langsung ke folder Download
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename || 'gambar-vektor.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        showToast("Gambar berhasil disimpan ke perangkat!");
       } catch (err) {
-        window.open(url, '_blank');
+        console.warn("Gagal unduh blob, menggunakan metode tautan alternatif:", err);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename || 'gambar-vektor.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
     }
 
