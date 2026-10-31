@@ -228,6 +228,10 @@
         <div id="loadingState" class="hidden py-12 text-center space-y-3">
           <div class="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mx-auto"></div>
           <p id="loadingStatusText" class="text-xs font-bold text-slate-700">Memproses Generasi AI...</p>
+          <!-- Progress Bar Visual -->
+          <div class="w-full max-w-xs mx-auto bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+            <div id="loadingProgressBar" class="bg-brand-600 h-full w-0 transition-all duration-300"></div>
+          </div>
         </div>
 
         <!-- Generated Assets Grid -->
@@ -255,8 +259,13 @@
           <p id="modalPrompt" class="font-bold text-slate-800"></p>
         </div>
         <div>
-          <span class="text-slate-400 font-semibold block">Full Master Prompt:</span>
-          <p id="modalMasterPrompt" class="font-mono text-[10px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-200 break-words"></p>
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-slate-400 font-semibold">Full Master Prompt:</span>
+            <button id="btnCopyMasterPrompt" type="button" class="text-[10px] font-bold text-brand-600 hover:underline">
+              <i class="fa-regular fa-copy mr-1"></i>Salin
+            </button>
+          </div>
+          <p id="modalMasterPrompt" class="font-mono text-[10px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-200 break-words select-all"></p>
         </div>
         <div class="flex justify-between text-slate-500">
           <span>Style: <strong id="modalStyle" class="text-slate-800"></strong></span>
@@ -275,349 +284,7 @@
       </div>
     </div>
   </div>
-
-  <!-- API Key Config Modal -->
-  <div id="apiKeyModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl relative border border-slate-100">
-      <button id="btnApiKeyClose" type="button" class="absolute top-4 right-4 w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold transition">
-        &times;
-      </button>
-      <div class="space-y-1">
-        <h3 class="text-sm font-bold text-slate-900 flex items-center">
-          <i class="fa-solid fa-key text-amber-500 mr-2"></i> Gemini API Key (Opsional)
-        </h3>
-        <p class="text-[11px] text-slate-500">Masukkan API Key Gemini pribadi jika membuka situs dari GitHub Pages agar generasi gambar presisi 100%.</p>
-      </div>
-      <input id="inputUserApiKey" type="password" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="AIzaSy...">
-      <div class="flex space-x-2">
-        <button id="btnSaveApiKey" type="button" class="flex-1 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow transition">Simpan Key</button>
-        <button id="btnClearApiKey" type="button" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-xl transition">Hapus</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg transition-all duration-300 transform translate-y-20 opacity-0 flex items-center space-x-2">
-    <i class="fa-solid fa-circle-info text-brand-400"></i>
-    <span id="toastMessage">Notifikasi</span>
-  </div>
-
-  <!-- JavaScript Logic -->
-  <script>
-    const VECTOR_STYLES = [
-      { id: 'flat', name: 'Modern Flat (Freepik)', tag: 'MICROSTOCK', active: true },
-      { id: 'kawaii', name: 'Kawaii & Maskot Imut', tag: 'POD/STICKER' },
-      { id: 'isometric', name: 'Isometrik 3D Tech', tag: 'MICROSTOCK' },
-      { id: 'sticker', name: 'Stiker Die-Cut POD', tag: 'ETSY/POD' },
-      { id: 'monoline', name: 'Monoline & Line Art', tag: 'MINIMAL' },
-      { id: 'gradient', name: 'Gradien Fluid Modern', tag: 'UI/WEB' },
-      { id: 'badge', name: 'Vintage Badge Emblem', tag: 'POD/T-SHIRT' },
-      { id: 'corporate', name: 'Corporate & Business', tag: 'MICROSTOCK' },
-      { id: 'watercolor', name: 'Watercolor Vector Art', tag: 'CREATIVE' },
-      { id: 'papercut', name: 'Paper Cutout 3D', tag: 'TRENDING' },
-      { id: 'doodle', name: 'Hand-Drawn Doodle', tag: 'CASUAL' },
-      { id: 'siluet', name: 'Siluet Clean & Stencil', tag: 'CUTTING' },
-      { id: 'icon', name: 'App Icon & UI Glyph', tag: 'ASSET' },
-      { id: 'cyberpunk', name: 'Neon Synthwave', tag: 'GAMING' },
-      { id: 'clay3d', name: '3D Claymorphism', tag: 'TRENDING' }
-    ];
-
-    const SAMPLE_PROMPTS = [
-      "kelinci imut membawa wortel segar dengan mata berbinar ceria",
-      "kucing astronot lucu melayang di luar angkasa dengan helm kaca",
-      "cangkir kopi karakter kartun tersenyum memegang donat manis",
-      "anak anjing corgi bermain bola di taman bunga matahari",
-      "robot kecil ramah menyiram tanaman bunga dalam pot"
-    ];
-
-    let selectedStyle = VECTOR_STYLES.find(s => s.active) || VECTOR_STYLES[2];
-    let selectedPalette = "Default";
-    let isGenerating = false;
-    let generatedAssets = [];
-    let currentActiveAsset = null;
-
-    const stylesGrid = document.getElementById('stylesGrid');
-    const promptInput = document.getElementById('promptInput');
-    const charCounter = document.getElementById('charCounter');
-    const selectedStyleBadge = document.getElementById('selectedStyleBadge');
-    const btnRandomPrompt = document.getElementById('btnRandomPrompt');
-    const btnClearPrompt = document.getElementById('btnClearPrompt');
-    const btnOptimizePrompt = document.getElementById('btnOptimizePrompt');
-    const optimizedPromptBox = document.getElementById('optimizedPromptBox');
-    const optimizedPromptText = document.getElementById('optimizedPromptText');
-    const btnUseOptimizedPrompt = document.getElementById('btnUseOptimizedPrompt');
-    const btnGenerate = document.getElementById('btnGenerate');
-    const btnGenerateText = document.getElementById('btnGenerateText');
-    const resultsGrid = document.getElementById('resultsGrid');
-    const emptyState = document.getElementById('emptyState');
-    const loadingState = document.getElementById('loadingState');
-    const loadingStatusText = document.getElementById('loadingStatusText');
-    const resultCountBadge = document.getElementById('resultCountBadge');
-    const btnDownloadAll = document.getElementById('btnDownloadAll');
-
-    const assetModal = document.getElementById('assetModal');
-    const modalImg = document.getElementById('modalImg');
-    const modalPrompt = document.getElementById('modalPrompt');
-    const modalMasterPrompt = document.getElementById('modalMasterPrompt');
-    const modalStyle = document.getElementById('modalStyle');
-    const modalPalette = document.getElementById('modalPalette');
-    const btnModalClose = document.getElementById('btnModalClose');
-    const btnModalDownload = document.getElementById('btnModalDownload');
-    const btnModalOpenTab = document.getElementById('btnModalOpenTab');
-
-    // API Key Modal Elements
-    const btnApiKeyConfig = document.getElementById('btnApiKeyConfig');
-    const apiKeyModal = document.getElementById('apiKeyModal');
-    const btnApiKeyClose = document.getElementById('btnApiKeyClose');
-    const inputUserApiKey = document.getElementById('inputUserApiKey');
-    const btnSaveApiKey = document.getElementById('btnSaveApiKey');
-    const btnClearApiKey = document.getElementById('btnClearApiKey');
-    const apiKeyStatusLabel = document.getElementById('apiKeyStatusLabel');
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderStyles();
-      setupEventListeners();
-      promptInput.value = "kelinci imut membawa wortel segar dengan mata berbinar ceria";
-      updateCharCount();
-
-      const savedKey = localStorage.getItem('user_gemini_key');
-      if (savedKey) {
-        inputUserApiKey.value = savedKey;
-        apiKeyStatusLabel.textContent = "Key Terpasang";
-      }
-    });
-
-    function renderStyles() {
-      if (!stylesGrid) return;
-      stylesGrid.innerHTML = '';
-      VECTOR_STYLES.forEach(style => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `style-card p-2.5 rounded-xl border border-slate-200 text-left transition flex flex-col justify-between hover:border-brand-300 hover:bg-slate-50 cursor-pointer ${style.active ? 'active' : ''}`;
-        btn.innerHTML = `
-          <span class="text-[9px] font-bold tracking-wider uppercase text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded w-max mb-1 border border-brand-100">${style.tag}</span>
-          <span class="text-xs font-bold text-slate-800 leading-tight">${style.name}</span>
-        `;
-        btn.onclick = () => {
-          document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active'));
-          btn.classList.add('active');
-          VECTOR_STYLES.forEach(s => s.active = false);
-          style.active = true;
-          selectedStyle = style;
-          if (selectedStyleBadge) {
-            selectedStyleBadge.textContent = `Terpilih: ${style.name}`;
-          }
-        };
-        stylesGrid.appendChild(btn);
-      });
-    }
-
-    function setupEventListeners() {
-      promptInput.addEventListener('input', updateCharCount);
-
-      // API Key Modal Listeners
-      if (btnApiKeyConfig) btnApiKeyConfig.addEventListener('click', () => apiKeyModal.classList.remove('hidden'));
-      if (btnApiKeyClose) btnApiKeyClose.addEventListener('click', () => apiKeyModal.classList.add('hidden'));
-      if (btnSaveApiKey) {
-        btnSaveApiKey.addEventListener('click', () => {
-          const val = inputUserApiKey.value.trim();
-          if (val) {
-            localStorage.setItem('user_gemini_key', val);
-            apiKeyStatusLabel.textContent = "Key Terpasang";
-            showToast("Gemini API Key tersimpan!");
-          } else {
-            localStorage.removeItem('user_gemini_key');
-            apiKeyStatusLabel.textContent = "Pengaturan Key";
-          }
-          apiKeyModal.classList.add('hidden');
-        });
-      }
-      if (btnClearApiKey) {
-        btnClearApiKey.addEventListener('click', () => {
-          inputUserApiKey.value = "";
-          localStorage.removeItem('user_gemini_key');
-          apiKeyStatusLabel.textContent = "Pengaturan Key";
-          showToast("API Key dihapus!");
-          apiKeyModal.classList.add('hidden');
-        });
-      }
-
-      document.querySelectorAll('.palette-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active', 'ring-2', 'ring-brand-500'));
-          e.target.classList.add('active', 'ring-2', 'ring-brand-500');
-          selectedPalette = e.target.dataset.palette;
-        });
-      });
-
-      btnRandomPrompt.addEventListener('click', () => {
-        const idx = Math.floor(Math.random() * SAMPLE_PROMPTS.length);
-        promptInput.value = SAMPLE_PROMPTS[idx];
-        updateCharCount();
-      });
-
-      btnClearPrompt.addEventListener('click', () => {
-        promptInput.value = '';
-        updateCharCount();
-      });
-
-      btnOptimizePrompt.addEventListener('click', optimizePrompt);
-
-      btnUseOptimizedPrompt.addEventListener('click', () => {
-        if (optimizedPromptText.textContent) {
-          promptInput.value = optimizedPromptText.textContent;
-          updateCharCount();
-        }
-      });
-
-      btnGenerate.addEventListener('click', startGeneration);
-
-      btnModalClose.addEventListener('click', () => assetModal.classList.add('hidden'));
-
-      if (btnModalOpenTab) {
-        btnModalOpenTab.addEventListener('click', () => {
-          if (currentActiveAsset) window.open(currentActiveAsset.url, '_blank');
-        });
-      }
-
-      btnModalDownload.addEventListener('click', () => {
-        if (currentActiveAsset) downloadImage(currentActiveAsset.url, `${currentActiveAsset.prompt}.png`);
-      });
-
-      btnDownloadAll.addEventListener('click', () => {
-        generatedAssets.forEach((asset, idx) => {
-          setTimeout(() => downloadImage(asset.url, `vektor-${idx + 1}.png`), idx * 300);
-        });
-      });
-    }
-
-    function updateCharCount() {
-      charCounter.textContent = `${promptInput.value.length} karakter`;
-    }
-
-    async function optimizePrompt() {
-      const text = promptInput.value.trim();
-      if (!text) {
-        showToast("Masukkan prompt terlebih dahulu!");
-        return;
-      }
-
-      btnOptimizePrompt.disabled = true;
-      btnOptimizePrompt.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Memproses Gemini AI...</span>`;
-
-      try {
-        const systemPrompt = "Act as an expert prompt engineer for vector stock illustration generation. Convert the user prompt into a highly detailed English master prompt suitable for clean, high-quality vector stock graphic assets. Keep it concise under 40 words.";
-        const userQuery = `Original prompt: "${text}". Style: ${selectedStyle.name}. Palette: ${selectedPalette}. Angle: ${document.getElementById('selectAngle').value}.`;
-        
-        const apiKey = "";
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-        
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: userQuery }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] }
-          })
-        });
-        
-        const result = await response.json();
-        const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        if (generatedText) {
-          optimizedPromptText.textContent = generatedText.trim();
-          optimizedPromptBox.classList.remove('hidden');
-          showToast("Prompt berhasil dioptimalkan dengan Gemini AI!");
-        } else {
-          fallbackPromptOptimization(text);
-        }
-      } catch (err) {
-        console.warn("Gemini API skipped or offline, using prompt helper:", err);
-        fallbackPromptOptimization(text);
-      } finally {
-        btnOptimizePrompt.disabled = false;
-        btnOptimizePrompt.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-xs"></i> <span>Optimalkan Prompt Gemini AI</span>`;
-      }
-    }
-
-    function fallbackPromptOptimization(text) {
-      const angle = document.getElementById('selectAngle').value;
-      optimizedPromptText.textContent = `High-end 2D vector graphic illustration of ${text}, ${selectedStyle.name} aesthetic, ${angle}, vibrant ${selectedPalette} colors, isolated, professional stock asset`;
-      optimizedPromptBox.classList.remove('hidden');
-      showToast("Prompt dioptimalkan!");
-    }
-    function translatePromptToEnglish(str) {
-      let text = str.toLowerCase();
-      const dictionary = [
-        [/kelinci/g, 'rabbit'], [/imut/g, 'cute'], [/membawa/g, 'holding'], [/wortel/g, 'carrot'],
-        [/segar/g, 'fresh'], [/dengan/g, 'with'], [/mata/g, 'eyes'], [/berbinar/g, 'sparkling'],
-        [/ceria/g, 'cheerful'], [/kucing/g, 'cat'], [/astronot/g, 'astronaut'], [/lucu/g, 'cute'],
-        [/melayang/g, 'floating'], [/di luar angkasa/g, 'in space'], [/helm kaca/g, 'glass helmet'],
-        [/cangkir/g, 'cup'], [/kopi/g, 'coffee'], [/karakter/g, 'character'], [/kartun/g, 'cartoon'],
-        [/tersenyum/g, 'smiling'], [/memegang/g, 'holding'], [/donat/g, 'donut'], [/manis/g, 'sweet'],
-        [/anak anjing/g, 'puppy'], [/bermain/g, 'playing'], [/bola/g, 'ball'], [/di taman/g, 'in garden'],
-        [/bunga matahari/g, 'sunflower'], [/robot/g, 'robot'], [/kecil/g, 'small'], [/ramah/g, 'friendly'],
-        [/menyiram/g, 'watering'], [/tanaman/g, 'plants'], [/pot/g, 'pot']
-      ];
-      dictionary.forEach(([regex, replacement]) => {
-        text = text.replace(regex, replacement);
-      });
-      return text;
-    }
-
-    async function generateSingleGeminiImage(promptRaw, aspectRatioVal, seedOffset) {
-      const userKey = localStorage.getItem('user_gemini_key') || "";
-      const apiKey = userKey || "";
-      const englishPrompt = translatePromptToEnglish(promptRaw);
-      
-      const angle = document.getElementById('selectAngle').value;
-      const bg = document.getElementById('selectBackground').value;
-      const isSticker = document.getElementById('chkStickerBorder').checked;
-      const stickerTag = isSticker ? "thick white die-cut sticker outline" : "";
-      
-      const fullPrompt = `High quality 2D graphic vector illustration of ${englishPrompt}, ${selectedStyle.name} style, ${angle}, ${selectedPalette} palette, ${stickerTag}, ${bg}, clean sharp 2D vector art, stock graphic asset style, vibrant colors, no photo realism, vector icon illustration`;
-
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
-      const payload = {
-        contents: [{
-          role: 'user',
-          parts: [{ text: `${fullPrompt}. High precision vector graphic variation #${seedOffset}` }]
-        }],
-        generationConfig: {
-          responseModalities: ['IMAGE'],
-          imageConfig: { aspectRatio: aspectRatioVal }
-        }
-      };
-
-      if (apiKey) {
-        try {
-          const res = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-          const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-          if (part && part.inlineData?.data) {
-            const mime = part.inlineData.mimeType || 'image/png';
-            return `data:${mime};base64,${part.inlineData.data}`;
-          }
-        } catch (e) {
-          console.warn("Gemini API call bypassed or unreachable, using fallback engine:", e);
-        }
-      }
-
-      // Secondary Pollinations Fallback with accurate English vector prompt
-      try {
-        const currentSeed = Math.floor(Math.random() * 899999) + 100000 + seedOffset;
-        const encodedPrompt = encodeURIComponent(`2d vector graphic illustration of ${englishPrompt}, ${selectedStyle.name} style, ${selectedPalette} palette, clean flat design vector asset, isolated background, seed ${seedOffset}`);
-        return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${currentSeed}&nologo=true&model=flux`;
-      } catch (err) {
-        // Tertiary Dynamic SVG Fallback
-        return generateDynamicVectorSVG(promptRaw, selectedStyle.name, selectedPalette, seedOffset);
-      }
-    }
-
+<!-- ... existing code -->
     async function startGeneration() {
       const text = promptInput.value.trim();
       if (!text) {
@@ -630,12 +297,15 @@
       const bg = document.getElementById('selectBackground').value;
       const aspectRatioVal = document.getElementById('selectAspectRatio').value || "1:1";
       const isSticker = document.getElementById('chkStickerBorder').checked;
+      const progressBar = document.getElementById('loadingProgressBar');
 
       isGenerating = true;
       btnGenerate.disabled = true;
       emptyState.classList.add('hidden');
       resultsGrid.classList.add('hidden');
       loadingState.classList.remove('hidden');
+
+      if (progressBar) progressBar.style.width = '0%';
 
       generatedAssets = [];
       resultsGrid.innerHTML = '';
@@ -646,34 +316,36 @@
       loadingStatusText.textContent = `Memproses Vektor AI (0/${count})...`;
       btnGenerateText.textContent = `Memproses Batch (${count})`;
 
-      const promises = [];
+      const userKey = localStorage.getItem('user_gemini_key') || "";
+      const delayBetweenRequests = userKey ? 800 : 2200;
+
       for (let i = 1; i <= count; i++) {
-        promises.push(
-          (async () => {
-            const imgUrl = await generateSingleGeminiImage(masterPrompt, aspectRatioVal, i);
-            generatedAssets.push({
-              id: `asset-${i}`,
-              prompt: text,
-              masterPrompt: masterPrompt,
-              style: selectedStyle.name,
-              palette: selectedPalette,
-              seed: i,
-              url: imgUrl
-            });
-            loadingStatusText.textContent = `Memproses Vektor AI (${generatedAssets.length}/${count})...`;
-          })()
-        );
+        loadingStatusText.textContent = `Memproses Gambar Vektor AI (${i}/${count})...`;
+        if (progressBar) progressBar.style.width = `${Math.round((i / count) * 100)}%`;
+
+        const imgUrl = await generateSingleGeminiImage(text, aspectRatioVal, i);
+        generatedAssets.push({
+          id: `asset-${i}`,
+          prompt: text,
+          masterPrompt: masterPrompt,
+          style: selectedStyle.name,
+          palette: selectedPalette,
+          seed: i,
+          url: imgUrl
+        });
+        
+        renderResults();
+        resultsGrid.classList.remove('hidden');
+
+        if (i < count) {
+          await new Promise(r => setTimeout(r, delayBetweenRequests));
+        }
       }
-
-      await Promise.all(promises);
-
-      renderResults();
 
       isGenerating = false;
       btnGenerate.disabled = false;
       btnGenerateText.textContent = "Generate Presisi Vector";
       loadingState.classList.add('hidden');
-      resultsGrid.classList.remove('hidden');
       btnDownloadAll.classList.remove('hidden');
       btnDownloadAll.classList.add('flex');
       resultCountBadge.textContent = `(${generatedAssets.length})`;
@@ -681,100 +353,108 @@
     }
 
     function renderResults() {
+      if (!resultsGrid) return;
       resultsGrid.innerHTML = '';
       generatedAssets.forEach((asset) => {
         const card = document.createElement('div');
-        card.className = 'group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col relative';
-
+        card.className = 'bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition flex flex-col group';
         card.innerHTML = `
-          <div class="relative aspect-square bg-slate-50 overflow-hidden cursor-pointer flex items-center justify-center p-2">
-            <img src="${asset.url}" alt="${asset.prompt}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
-          </div>
-          <div class="p-3 bg-white flex flex-col justify-between flex-1 border-t border-slate-100 space-y-2">
-            <div>
-              <div class="text-xs font-bold text-slate-800 truncate">${asset.prompt}</div>
-              <div class="text-[10px] text-slate-400 mt-0.5">${asset.style}</div>
+          <div class="relative aspect-square bg-white overflow-hidden flex items-center justify-center p-2 cursor-pointer border-b border-slate-100" onclick="openAssetModal('${asset.id}')">
+            <img src="${asset.url}" alt="${asset.prompt}" class="w-full h-full object-contain transition group-hover:scale-105" loading="lazy" onerror="this.src=generateDynamicVectorSVG('${asset.prompt.replace(/'/g, "\\'")}', '${asset.style}', '${asset.palette}', ${asset.seed})">
+            <div class="absolute top-2 right-2 flex gap-1">
+              <span class="text-[9px] font-bold bg-slate-900/70 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">${asset.style.split(' ')[0]}</span>
             </div>
-            <button type="button" class="btn-dl w-full py-1.5 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 font-semibold text-[11px] rounded-lg transition-colors flex items-center justify-center space-x-1 border border-slate-200 active:scale-95">
-              <i class="fa-solid fa-download text-[10px]"></i>
-              <span>Unduh PNG</span>
-            </button>
+          </div>
+          <div class="p-2.5 flex-1 flex flex-col justify-between space-y-2">
+            <div>
+              <p class="text-xs font-bold text-slate-800 line-clamp-2 leading-tight">${asset.prompt}</p>
+              <p class="text-[10px] text-slate-400 font-medium mt-0.5">${asset.style}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 pt-1">
+              <button type="button" onclick="openAssetModal('${asset.id}')" class="py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-[11px] rounded-lg transition flex items-center justify-center space-x-1">
+                <i class="fa-regular fa-eye text-[10px]"></i>
+                <span>Detail</span>
+              </button>
+              <button type="button" onclick="downloadImage('${asset.url}', 'vektor_${asset.seed}.png')" class="py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-[11px] rounded-lg transition flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-download text-[10px]"></i>
+                <span>Unduh</span>
+              </button>
+            </div>
           </div>
         `;
-
-        card.querySelector('img').onclick = () => openModal(asset);
-        card.querySelector('.btn-dl').onclick = (e) => {
-          e.stopPropagation();
-          downloadImage(asset.url, `${asset.prompt}.png`);
-        };
-
         resultsGrid.appendChild(card);
       });
     }
 
-    function openModal(asset) {
+    function openAssetModal(assetId) {
+      const asset = generatedAssets.find(a => a.id === assetId);
+      if (!asset) return;
       currentActiveAsset = asset;
       modalImg.src = asset.url;
       modalPrompt.textContent = asset.prompt;
       modalMasterPrompt.textContent = asset.masterPrompt;
       modalStyle.textContent = asset.style;
       modalPalette.textContent = asset.palette;
+
+      const btnCopy = document.getElementById('btnCopyMasterPrompt');
+      if (btnCopy) {
+        btnCopy.onclick = () => copyToClipboard(asset.masterPrompt);
+      }
+
       assetModal.classList.remove('hidden');
     }
 
-    // Helper konversi Data URL ke Blob biner
-    function dataURLtoBlob(dataurl) {
-      const arr = dataurl.split(',');
-      const mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
+    function copyToClipboard(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast("Master prompt berhasil disalin!");
+      } catch (err) {
+        showToast("Gagal menyalin text.");
       }
-      return new Blob([u8arr], { type: mime });
+      document.body.removeChild(textarea);
     }
 
-    // Fungsi pengunduhan langsung ke perangkat/HP
     async function downloadImage(url, filename) {
       showToast("Mengunduh gambar...");
       try {
-        let blobUrl;
-        
         if (url.startsWith('data:')) {
-          const blob = dataURLtoBlob(url);
-          blobUrl = URL.createObjectURL(blob);
-        } else {
-          // Ambil data gambar publik via fetch blob
-          const response = await fetch(url);
-          const blob = await response.blob();
-          blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename || 'vektor-ai.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast("Gambar berhasil tersimpan!");
+          return;
         }
 
-        // Picu perintah simpan berkas langsung ke folder Download
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = blobUrl;
-        a.download = filename || 'gambar-vektor.png';
+        a.download = filename || 'vektor-ai.png';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-
         setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-        showToast("Gambar berhasil disimpan ke perangkat!");
+        showToast("Gambar berhasil tersimpan!");
       } catch (err) {
-        console.warn("Gagal unduh blob, menggunakan metode tautan alternatif:", err);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename || 'gambar-vektor.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        window.open(url, '_blank');
       }
     }
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
-      document.getElementById('toastMessage').textContent = msg;
+      const toastMessage = document.getElementById('toastMessage');
+      if (!toast || !toastMessage) return;
+      toastMessage.textContent = msg;
       toast.classList.remove('translate-y-20', 'opacity-0');
       toast.classList.add('translate-y-0', 'opacity-100');
       setTimeout(() => {
@@ -782,6 +462,4 @@
         toast.classList.add('translate-y-20', 'opacity-0');
       }, 3000);
     }
-  </script>
-</body>
-</html>
+<!-- ... existing code -->
