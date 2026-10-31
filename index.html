@@ -1,560 +1,709 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generator - Vektor</title>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- FontAwesome Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script>
-tailwind.config = {
-theme: {
-extend: {
-colors: {
-brand: {
-50: '#f0f7ff',
-100: '#e0effe',
-500: '#2563eb',
-600: '#1d4ed8',
-700: '#1e40af'
-}
-}
-}
-}
-}
-</script>
-<style>
-.style-card.active {
-border-color: #2563eb;
-background-color: #eff6ff;
-}
-.palette-btn.active {
-box-shadow: 0 0 0 2px #2563eb;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator - Vektor</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .style-card.active {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+    }
+    .palette-btn.active {
+      box-shadow: 0 0 0 2px #2563eb;
+    }
+  </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
-​<!-- Navigation Header -->
-<header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-<div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-<div class="flex items-center space-x-3">
-<div class="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center text-white font-black text-xl shadow">
-GV
-</div>
-<div>
-<h1 class="font-bold text-slate-900 leading-tight text-lg">Generator - Vektor</h1>
-<p class="text-[11px] text-slate-500 font-medium">Platform Generator Vektor AI Presisi</p>
-</div>
-</div>
-<div class="flex items-center space-x-2">
-<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-<span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-Engine Active
-</span>
-</div>
-</div>
-</header>
-​<!-- Main Content Layout -->
-<main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-​<!-- Left / Center Section: Prompt & Settings -->
-<div class="lg:col-span-7 space-y-6">
-​<!-- Prompt Input Panel -->
-<div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-<div class="flex items-center justify-between">
-<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-Instruksi Utama Gambar (Prompt)
-</label>
-<span id="charCounter" class="text-xs font-semibold text-slate-400">0 karakter</span>
-</div>
-​<textarea id="promptInput" rows="3" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition text-slate-800 text-sm placeholder-slate-400 resize-none" placeholder="Deskripsikan gambar yang ingin dibuat (contoh: kelinci imut membawa wortel)..."></textarea>
-​<!-- Prompt Actions -->
-<div class="flex flex-wrap gap-2 pt-1">
-<button id="btnOptimizePrompt" class="px-3.5 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5">
-<i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-<span>Optimalkan Prompt Gemini AI</span>
-</button>
-<button id="btnRandomPrompt" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-xl transition flex items-center space-x-1">
-<i class="fa-solid fa-shuffle text-slate-500"></i>
-<span>Acak Contoh</span>
-</button>
-<button id="btnClearPrompt" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-xl transition flex items-center space-x-1">
-<i class="fa-solid fa-eraser text-slate-500"></i>
-<span>Bersihkan</span>
-</button>
-</div>
-​<!-- Optimized Prompt Result Box -->
-<div id="optimizedPromptBox" class="hidden p-3.5 bg-indigo-50/80 border border-indigo-100 rounded-xl space-y-2">
-<div class="flex items-center justify-between">
-<span class="text-[11px] font-bold text-indigo-900 uppercase flex items-center">
-<i class="fa-solid fa-circle-check text-indigo-600 mr-1.5"></i> Hasil Optimasi Gemini AI
-</span>
-<button id="btnUseOptimizedPrompt" class="text-xs font-bold text-brand-600 hover:text-brand-700">Gunakan Prompt Ini</button>
-</div>
-<p id="optimizedPromptText" class="text-xs text-indigo-950 font-mono leading-relaxed italic"></p>
-</div>
-​<!-- Primary Generate Button -->
-<button id="btnGenerate" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center space-x-2 disabled:opacity-50">
-<i class="fa-solid fa-bolt"></i>
-<span id="btnGenerateText">Generate Presisi Vector</span>
-</button>
-</div>
-​<!-- Color Palette & Controls -->
-<div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-<div>
-<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Palet Warna Akurat</label>
-<div class="flex flex-wrap gap-2">
-<button data-palette="Default" class="palette-btn active px-3 py-1.5 bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg border border-slate-200">Bebas / Auto</button>
-<button data-palette="Pastel Imut" class="palette-btn px-3 py-1.5 bg-pink-50 text-pink-700 font-semibold text-xs rounded-lg border border-pink-200">Pastel Imut</button>
-<button data-palette="Vibrant Cerah" class="palette-btn px-3 py-1.5 bg-amber-50 text-amber-700 font-semibold text-xs rounded-lg border border-amber-200">Vibrant Cerah</button>
-<button data-palette="Monokrom" class="palette-btn px-3 py-1.5 bg-slate-800 text-white font-semibold text-xs rounded-lg border border-slate-900">Monokrom Hitam-Putih</button>
-<button data-palette="Neon Cyberpunk" class="palette-btn px-3 py-1.5 bg-purple-50 text-purple-700 font-semibold text-xs rounded-lg border border-purple-200">Neon Cyberpunk</button>
-<button data-palette="Earthy Tone" class="palette-btn px-3 py-1.5 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-lg border border-emerald-200">Earthy Tone</button>
-</div>
-</div>
-​<div>
-<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Sudut Pandang (Angle)</label>
-<select id="selectAngle" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
-<option value="Front View (Tampak Depan Full)">Front View (Tampak Depan Full)</option>
-<option value="Three-Quarter Side View (Samping 3/4)">Three-Quarter Side View (Samping 3/4)</option>
-<option value="Side Profile (Tampak Samping Total)">Side Profile (Tampak Samping Total)</option>
-<option value="Isometric View (Isometrik)">Isometric View (Isometrik)</option>
-<option value="Close-up Focus">Close-up Focus</option>
-</select>
-</div>
-</div>
-​<!-- Vector Style Grid Picker -->
-<div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
-<div class="flex items-center justify-between">
-<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-Pilihan Style Vektor <span class="text-slate-400 font-normal">(12 Opsi)</span>
-</label>
-<span id="selectedStyleBadge" class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-100">
-Terpilih: Kawaii Imut
-</span>
-</div>
-<div id="stylesGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-<!-- Populated by JavaScript -->
-</div>
-</div>
-​</div>
-​<!-- Right Section: Settings Sidebar & Generated Results -->
-<div class="lg:col-span-5 space-y-6">
-​<!-- Asset Generation Settings Sidebar -->
-<div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-<h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center">
-<i class="fa-solid fa-sliders text-brand-600 mr-2"></i> Pengaturan Aset Vektor
-</h3>
-​<div class="space-y-3 text-xs font-medium">
-<div>
-<label class="block text-slate-600 mb-1">Rasio Aspek Canvas</label>
-<select id="selectAspectRatio" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none">
-<option value="1:1">1:1 (Persegi Stok / Stiker)</option>
-<option value="4:3">4:3 (Lansekap Standar)</option>
-<option value="16:9">16:9 (Widescreen)</option>
-</select>
-</div>
-​<div>
-<label class="block text-slate-600 mb-1">Latar Belakang Gambar</label>
-<select id="selectBackground" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none">
-<option value="isolated on pure solid white background">Putih Solid Clean</option>
-<option value="isolated on transparent checkered background">Transparan (Stiker Format)</option>
-<option value="soft pastel gradient background">Soft Gradient Pastel</option>
-</select>
-</div>
-​<div>
-<div class="flex justify-between text-slate-600 mb-1">
-<label>Jumlah Gambar Per Batch</label>
-<span class="font-bold text-brand-600 text-xs">Maksimal 50</span>
-</div>
-<input id="inputBatchCount" type="number" min="1" max="50" value="4" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold focus:outline-none">
-</div>
-​<div class="pt-2 border-t border-slate-100">
-<label class="inline-flex items-center cursor-pointer">
-<input id="chkStickerBorder" type="checkbox" checked class="rounded border-slate-300 text-brand-600 focus:ring-brand-500 w-4 h-4">
-<span class="ml-2 text-slate-700 font-semibold text-xs">Tambahkan Outline Stiker Putih (Die-Cut)</span>
-</label>
-</div>
-</div>
-</div>
-​<!-- Generated Results Section -->
-<div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
-<div class="flex items-center justify-between border-b border-slate-100 pb-3">
-<h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center">
-<i class="fa-solid fa-layer-group text-brand-600 mr-2"></i> Hasil Generasi <span id="resultCountBadge" class="ml-1 text-brand-600 font-semibold">(0)</span>
-</h3>
-<button id="btnDownloadAll" class="hidden text-xs font-bold text-brand-600 hover:text-brand-700 items-center space-x-1">
-<i class="fa-solid fa-file-arrow-down"></i>
-<span>Unduh Semua</span>
-</button>
-</div>
-​<!-- Initial Empty State -->
-<div id="emptyState" class="py-12 text-center space-y-3">
-<div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 text-2xl">
-<i class="fa-regular fa-image"></i>
-</div>
-<div class="space-y-1">
-<p class="text-xs font-bold text-slate-600">Belum Ada Gambar Dibuat</p>
-<p class="text-[11px] text-slate-400 max-w-xs mx-auto">Tuliskan instruksi prompt di atas dan klik "Generate Presisi Vector" untuk mulai membuat aset.</p>
-</div>
-</div>
-​<!-- Loading State -->
-<div id="loadingState" class="hidden py-12 text-center space-y-3">
-<div class="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mx-auto"></div>
-<p id="loadingStatusText" class="text-xs font-bold text-slate-700">Memproses Generasi AI...</p>
-</div>
-​<!-- Generated Assets Grid -->
-<div id="resultsGrid" class="hidden grid grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-1">
-<!-- Populated by JavaScript -->
-</div>
-</div>
-​</div>
-​</main>
-​<!-- Asset Detail Modal -->
-<div id="assetModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-<div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-100 space-y-4 p-5 relative">
-<button id="btnModalClose" class="absolute top-4 right-4 w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold transition">
-×
-</button>
-<div class="aspect-square bg-slate-50 rounded-xl overflow-hidden border border-slate-100 flex items-center justify-center p-2">
-<img id="modalImg" src="" alt="" class="w-full h-full object-contain">
-</div>
-<div class="space-y-2 text-xs">
-<div>
-<span class="text-slate-400 font-semibold block">Instruksi Prompt:</span>
-<p id="modalPrompt" class="font-bold text-slate-800"></p>
-</div>
-<div>
-<span class="text-slate-400 font-semibold block">Full Master Prompt:</span>
-<p id="modalMasterPrompt" class="font-mono text-[10px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-200"></p>
-</div>
-<div class="flex justify-between text-slate-500">
-<span>Style: <strong id="modalStyle" class="text-slate-800"></strong></span>
-<span>Palet: <strong id="modalPalette" class="text-slate-800"></strong></span>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-2 pt-2">
-<button id="btnModalOpenTab" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center space-x-1">
-<i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-<span>Buka Tab Baru</span>
-</button>
-<button id="btnModalDownload" class="py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center space-x-1">
-<i class="fa-solid fa-download text-[10px]"></i>
-<span>Unduh PNG HD</span>
-</button>
-</div>
-</div>
-</div>
-​<!-- Toast Notification -->
-<div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg transition-all duration-300 transform translate-y-20 opacity-0 flex items-center space-x-2">
-<i class="fa-solid fa-circle-info text-brand-400"></i>
-<span id="toastMessage">Notifikasi</span>
-</div>
-​<!-- JavaScript Logic -->
-<script>
-const VECTOR_STYLES = [
-{ id: 'flat', name: 'Vektor Datar (Flat)', tag: 'VECTOR' },
-{ id: 'monoline', name: 'Vektor Monoline', tag: 'VECTOR' },
-{ id: 'kawaii', name: 'Kawaii Imut', tag: 'VECTOR', active: true },
-{ id: 'glossy3d', name: '3D Glossy', tag: 'VECTOR' },
-{ id: 'matte3d', name: '3D Matte', tag: 'VECTOR' },
-{ id: 'sticker', name: 'Stiker', tag: 'VECTOR' },
-{ id: 'isometric', name: 'Vektor Isometrik', tag: 'VECTOR' },
-{ id: 'lowpoly', name: 'Low Poly', tag: 'VECTOR' },
-{ id: 'lineart', name: 'Seni Garis (Line Art)', tag: 'VECTOR' },
-{ id: 'siluet', name: 'Siluet', tag: 'VECTOR' },
-{ id: 'emoji', name: 'Emoji', tag: 'VECTOR' },
-{ id: 'icon', name: 'Ikon', tag: 'VECTOR' }
-];
-​const SAMPLE_PROMPTS = [
-"kelinci imut membawa wortel segar dengan mata berbinar ceria",
-"kucing astronot lucu melayang di luar angkasa dengan helm kaca",
-"cangkir kopi karakter kartun tersenyum memegang donat manis",
-"anak anjing corgi bermain bola di taman bunga matahari",
-"robot kecil ramah menyiram tanaman bunga dalam pot"
-];
-​let selectedStyle = VECTOR_STYLES.find(s => s.active) || VECTOR_STYLES[2];
-let selectedPalette = "Default";
-let isGenerating = false;
-let generatedAssets = [];
-let currentActiveAsset = null;
-​const stylesGrid = document.getElementById('stylesGrid');
-const promptInput = document.getElementById('promptInput');
-const charCounter = document.getElementById('charCounter');
-const selectedStyleBadge = document.getElementById('selectedStyleBadge');
-const btnRandomPrompt = document.getElementById('btnRandomPrompt');
-const btnClearPrompt = document.getElementById('btnClearPrompt');
-const btnOptimizePrompt = document.getElementById('btnOptimizePrompt');
-const optimizedPromptBox = document.getElementById('optimizedPromptBox');
-const optimizedPromptText = document.getElementById('optimizedPromptText');
-const btnUseOptimizedPrompt = document.getElementById('btnUseOptimizedPrompt');
-const btnGenerate = document.getElementById('btnGenerate');
-const btnGenerateText = document.getElementById('btnGenerateText');
-const resultsGrid = document.getElementById('resultsGrid');
-const emptyState = document.getElementById('emptyState');
-const loadingState = document.getElementById('loadingState');
-const loadingStatusText = document.getElementById('loadingStatusText');
-const resultCountBadge = document.getElementById('resultCountBadge');
-const btnDownloadAll = document.getElementById('btnDownloadAll');
-​const assetModal = document.getElementById('assetModal');
-const modalImg = document.getElementById('modalImg');
-const modalPrompt = document.getElementById('modalPrompt');
-const modalMasterPrompt = document.getElementById('modalMasterPrompt');
-const modalStyle = document.getElementById('modalStyle');
-const modalPalette = document.getElementById('modalPalette');
-const btnModalClose = document.getElementById('btnModalClose');
-const btnModalDownload = document.getElementById('btnModalDownload');
-const btnModalOpenTab = document.getElementById('btnModalOpenTab');
-​document.addEventListener('DOMContentLoaded', () => {
-renderStyles();
-setupEventListeners();
-promptInput.value = "kelinci imut membawa wortel segar dengan mata berbinar ceria";
-updateCharCount();
-});
-​function renderStyles() {
-stylesGrid.innerHTML = '';
-VECTOR_STYLES.forEach(style => {
-const card = document.createElement('div');
-const isActive = style.id === selectedStyle.id;
-card.className = style-card cursor-pointer border rounded-lg p-2 text-center transition-all relative flex flex-col justify-between bg-slate-50 hover:bg-white hover:shadow-sm ${ isActive ? 'active border-brand-500 bg-blue-50/50' : 'border-slate-200' };
-card.onclick = () => {
-selectedStyle = style;
-renderStyles();
-selectedStyleBadge.textContent = Terpilih: ${style.name};
-};
-card.innerHTML = <span class="active-dot absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 ${isActive ? 'block' : 'hidden'}"></span> <div class="text-[11px] font-semibold text-slate-800 truncate mb-0.5">${style.name}</div> <div class="text-[8px] font-bold text-slate-400 uppercase">${style.tag}</div>;
-stylesGrid.appendChild(card);
-});
-}
-​function setupEventListeners() {
-promptInput.addEventListener('input', updateCharCount);
-​document.querySelectorAll('.palette-btn').forEach(btn => {
-btn.addEventListener('click', (e) => {
-document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active', 'ring-2', 'ring-brand-500'));
-e.target.classList.add('active', 'ring-2', 'ring-brand-500');
-selectedPalette = e.target.dataset.palette;
-});
-});
-​btnRandomPrompt.addEventListener('click', () => {
-const idx = Math.floor(Math.random() * SAMPLE_PROMPTS.length);
-promptInput.value = SAMPLE_PROMPTS[idx];
-updateCharCount();
-});
-​btnClearPrompt.addEventListener('click', () => {
-promptInput.value = '';
-updateCharCount();
-});
-​btnOptimizePrompt.addEventListener('click', optimizePrompt);
-​btnUseOptimizedPrompt.addEventListener('click', () => {
-if (optimizedPromptText.textContent) {
-promptInput.value = optimizedPromptText.textContent;
-updateCharCount();
-}
-});
-​btnGenerate.addEventListener('click', startGeneration);
-​btnModalClose.addEventListener('click', () => assetModal.classList.add('hidden'));
-​if (btnModalOpenTab) {
-btnModalOpenTab.addEventListener('click', () => {
-if (currentActiveAsset) window.open(currentActiveAsset.url, '_blank');
-});
-}
-​btnModalDownload.addEventListener('click', () => {
-if (currentActiveAsset) downloadImage(currentActiveAsset.url, ${currentActiveAsset.prompt}.png);
-});
-​btnDownloadAll.addEventListener('click', () => {
-generatedAssets.forEach((asset, idx) => {
-setTimeout(() => downloadImage(asset.url, vektor-${idx + 1}.png), idx * 300);
-});
-});
-}
-​function updateCharCount() {
-charCounter.textContent = ${promptInput.value.length} karakter;
-}
-​async function optimizePrompt() {
-const text = promptInput.value.trim();
-if (!text) return;
-​btnOptimizePrompt.disabled = true;
-btnOptimizePrompt.innerHTML = <i class="fa-solid fa-spinner animate-spin"></i> <span>Memproses Gemini AI...</span>;
-​try {
-const systemPrompt = "You are an expert prompt engineer for vector stock illustration generation. Convert the user prompt into a highly detailed English master prompt suitable for clean, high-quality vector stock graphic assets. Keep it concise under 40 words.";
-const userQuery = Original prompt: "${text}". Style: ${selectedStyle.name}. Palette: ${selectedPalette}. Angle: ${document.getElementById('selectAngle').value}.;
-​const apiKey = "";
-if (apiKey && apiKey.trim() !== "") {
-const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey};
-const response = await fetch(apiUrl, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({
-contents: [{ parts: [{ text: userQuery }] }],
-systemInstruction: { parts: [{ text: systemPrompt }] }
-})
-});
-const result = await response.json();
-const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-if (generatedText) {
-optimizedPromptText.textContent = generatedText.trim();
-optimizedPromptBox.classList.remove('hidden');
-showToast("Prompt berhasil dioptimalkan dengan Gemini AI!");
-return;
-}
-}
-​optimizedPromptText.textContent = Cute 2D ${selectedStyle.name} vector illustration of ${text}, ${document.getElementById('selectAngle').value}, ${selectedPalette} colors, isolated background, stock asset format;
-optimizedPromptBox.classList.remove('hidden');
-showToast("Prompt berhasil dioptimalkan!");
-} catch (err) {
-console.error(err);
-optimizedPromptText.textContent = Cute 2D ${selectedStyle.name} vector illustration of ${text}, ${document.getElementById('selectAngle').value}, ${selectedPalette} colors, isolated background;
-optimizedPromptBox.classList.remove('hidden');
-} finally {
-btnOptimizePrompt.disabled = false;
-btnOptimizePrompt.innerHTML = <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> <span>Optimalkan Prompt Gemini AI</span>;
-}
-}
-​async function generateSingleGeminiImage(fullPrompt, aspectRatioVal, seedOffset) {
-const apiKey = "";
-​if (apiKey && apiKey.trim() !== "") {
-const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey};
-const payload = {
-contents: [{
-role: 'user',
-parts: [{ text: ${fullPrompt}. Pose or variation style #${seedOffset} }]
-}],
-generationConfig: {
-responseModalities: ['IMAGE'],
-imageConfig: { aspectRatio: aspectRatioVal }
-}
-};
-​try {
-const res = await fetch(apiUrl, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify(payload)
-});
-const data = await res.json();
-const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-if (part && part.inlineData?.data) {
-return data:${part.inlineData.mimeType};base64,${part.inlineData.data};
-}
-} catch (e) {
-console.warn("Gemini API skipped, switching to fast engine:", e);
-}
-}
-​const currentSeed = Math.floor(Math.random() * 899999) + 100000 + seedOffset;
-const encodedPrompt = encodeURIComponent(${fullPrompt}, high quality vector image, cute 2d graphic asset, variation ${seedOffset});
-return https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${currentSeed}&nologo=true&model=flux;
-}
-​async function startGeneration() {
-const text = promptInput.value.trim();
-if (!text) {
-showToast("Masukkan prompt terlebih dahulu!");
-return;
-}
-​const count = Math.min(Math.max(parseInt(document.getElementById('inputBatchCount').value) || 4, 1), 50);
-const angle = document.getElementById('selectAngle').value;
-const bg = document.getElementById('selectBackground').value;
-const aspectRatioVal = document.getElementById('selectAspectRatio').value || "1:1";
-const isSticker = document.getElementById('chkStickerBorder').checked;
-​isGenerating = true;
-btnGenerate.disabled = true;
-emptyState.classList.add('hidden');
-resultsGrid.classList.add('hidden');
-loadingState.classList.remove('hidden');
-​generatedAssets = [];
-resultsGrid.innerHTML = '';
-​const stickerTag = isSticker ? "thick white die-cut sticker outline" : "";
-const masterPrompt = Cute vector graphics of ${text}, ${selectedStyle.name} style, ${angle}, ${selectedPalette} palette, ${stickerTag}, clean vector art, ${bg};
-​loadingStatusText.textContent = Memproses Vektor AI (0/${count})...;
-btnGenerateText.textContent = Memproses Batch (${count});
-​const promises = [];
-for (let i = 1; i <= count; i++) {
-promises.push(
-(async () => {
-const imgUrl = await generateSingleGeminiImage(masterPrompt, aspectRatioVal, i);
-generatedAssets.push({
-id: asset-${i},
-prompt: text,
-masterPrompt: masterPrompt,
-style: selectedStyle.name,
-palette: selectedPalette,
-seed: i,
-url: imgUrl
-});
-loadingStatusText.textContent = Memproses Vektor AI (${generatedAssets.length}/${count})...;
-})()
-);
-}
-​await Promise.all(promises);
-​renderResults();
-​isGenerating = false;
-btnGenerate.disabled = false;
-btnGenerateText.textContent = "Generate Presisi Vector";
-loadingState.classList.add('hidden');
-resultsGrid.classList.remove('hidden');
-btnDownloadAll.classList.remove('hidden');
-btnDownloadAll.classList.add('flex');
-resultCountBadge.textContent = (${generatedAssets.length});
-showToast(Berhasil! ${generatedAssets.length} aset gambar telah dibuat!);
-}
-​function renderResults() {
-resultsGrid.innerHTML = '';
-generatedAssets.forEach((asset) => {
-const card = document.createElement('div');
-card.className = 'group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col relative';
-​card.innerHTML = <div class="relative aspect-square bg-slate-50 overflow-hidden cursor-pointer flex items-center justify-center p-2"> <img src="${asset.url}" alt="${asset.prompt}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"> </div> <div class="p-3 bg-white flex flex-col justify-between flex-1 border-t border-slate-100 space-y-2"> <div> <div class="text-xs font-bold text-slate-800 truncate">${asset.prompt}</div> <div class="text-[10px] text-slate-400 mt-0.5">${asset.style}</div> </div> <button class="btn-dl w-full py-1.5 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 font-semibold text-[11px] rounded-lg transition-colors flex items-center justify-center space-x-1 border border-slate-200"> <i class="fa-solid fa-download text-[10px]"></i> <span>Unduh PNG</span> </button> </div>;
-​card.querySelector('img').onclick = () => openModal(asset);
-card.querySelector('.btn-dl').onclick = (e) => {
-e.stopPropagation();
-downloadImage(asset.url, ${asset.prompt}.png);
-};
-​resultsGrid.appendChild(card);
-});
-}
-​function openModal(asset) {
-currentActiveAsset = asset;
-modalImg.src = asset.url;
-modalPrompt.textContent = asset.prompt;
-modalMasterPrompt.textContent = asset.masterPrompt;
-modalStyle.textContent = asset.style;
-modalPalette.textContent = asset.palette;
-assetModal.classList.remove('hidden');
-}
-​async function downloadImage(url, filename) {
-showToast("Mengunduh gambar...");
-try {
-if (url.startsWith('data:')) {
-const a = document.createElement('a');
-a.href = url;
-a.download = filename || 'gambar-vektor.png';
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
-} else {
-const response = await fetch(url);
-const blob = await response.blob();
-const blobUrl = URL.createObjectURL ? URL.createObjectURL(blob) : window.webkitURL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = blobUrl;
-a.download = filename || 'gambar-vektor.png';
-document.body.appendChild(a);
-a.click();
-document.body.removeChild(a);
-setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-}
-} catch (err) {
-window.open(url, '_blank');
-}
-}
-​function showToast(msg) {
-const toast = document.getElementById('toast');
-document.getElementById('toastMessage').textContent = msg;
-toast.classList.remove('translate-y-20', 'opacity-0');
-toast.classList.add('translate-y-0', 'opacity-100');
-setTimeout(() => {
-toast.classList.remove('translate-y-0', 'opacity-100');
-toast.classList.add('translate-y-20', 'opacity-0');
-}, 3000);
-}
-</script>
+
+  <!-- Navigation Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center text-white font-black text-xl shadow">
+          GV
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-900 leading-tight text-lg">Generator - Vektor</h1>
+          <p class="text-[11px] text-slate-500 font-medium">Platform Generator Vektor AI Presisi</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+          Engine Active
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left / Center Section: Prompt & Settings -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- Prompt Input Panel -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Instruksi Utama Gambar (Prompt)
+          </label>
+          <span id="charCounter" class="text-xs font-semibold text-slate-400">0 karakter</span>
+        </div>
+
+        <textarea id="promptInput" rows="3" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition text-slate-800 text-sm placeholder-slate-400 resize-none" placeholder="Deskripsikan gambar yang ingin dibuat (contoh: kelinci imut membawa wortel)..."></textarea>
+
+        <!-- Prompt Actions -->
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button id="btnOptimizePrompt" type="button" class="px-3.5 py-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 active:scale-95">
+            <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+            <span>Optimalkan Prompt Gemini AI</span>
+          </button>
+          <button id="btnRandomPrompt" type="button" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-xl transition flex items-center space-x-1 active:scale-95">
+            <i class="fa-solid fa-shuffle text-slate-500"></i>
+            <span>Acak Contoh</span>
+          </button>
+          <button id="btnClearPrompt" type="button" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-xl transition flex items-center space-x-1 active:scale-95">
+            <i class="fa-solid fa-eraser text-slate-500"></i>
+            <span>Bersihkan</span>
+          </button>
+        </div>
+
+        <!-- Optimized Prompt Result Box -->
+        <div id="optimizedPromptBox" class="hidden p-3.5 bg-indigo-50/80 border border-indigo-100 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-indigo-900 uppercase flex items-center">
+              <i class="fa-solid fa-circle-check text-indigo-600 mr-1.5"></i> Hasil Optimasi Gemini AI
+            </span>
+            <button id="btnUseOptimizedPrompt" type="button" class="text-xs font-bold text-brand-600 hover:text-brand-700">Gunakan Prompt Ini</button>
+          </div>
+          <p id="optimizedPromptText" class="text-xs text-indigo-950 font-mono leading-relaxed italic"></p>
+        </div>
+
+        <!-- Primary Generate Button -->
+        <button id="btnGenerate" type="button" class="w-full py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-[0.99]">
+          <i class="fa-solid fa-bolt"></i>
+          <span id="btnGenerateText">Generate Presisi Vector</span>
+        </button>
+      </div>
+
+      <!-- Color Palette & Controls -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Palet Warna Akurat</label>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-palette="Default" class="palette-btn active px-3 py-1.5 bg-slate-100 text-slate-700 font-semibold text-xs rounded-lg border border-slate-200">Bebas / Auto</button>
+            <button type="button" data-palette="Pastel Imut" class="palette-btn px-3 py-1.5 bg-pink-50 text-pink-700 font-semibold text-xs rounded-lg border border-pink-200">Pastel Imut</button>
+            <button type="button" data-palette="Vibrant Cerah" class="palette-btn px-3 py-1.5 bg-amber-50 text-amber-700 font-semibold text-xs rounded-lg border border-amber-200">Vibrant Cerah</button>
+            <button type="button" data-palette="Monokrom" class="palette-btn px-3 py-1.5 bg-slate-800 text-white font-semibold text-xs rounded-lg border border-slate-900">Monokrom Hitam-Putih</button>
+            <button type="button" data-palette="Neon Cyberpunk" class="palette-btn px-3 py-1.5 bg-purple-50 text-purple-700 font-semibold text-xs rounded-lg border border-purple-200">Neon Cyberpunk</button>
+            <button type="button" data-palette="Earthy Tone" class="palette-btn px-3 py-1.5 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-lg border border-emerald-200">Earthy Tone</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Sudut Pandang (Angle)</label>
+          <select id="selectAngle" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <option value="Front View (Tampak Depan Full)">Front View (Tampak Depan Full)</option>
+            <option value="Three-Quarter Side View (Samping 3/4)">Three-Quarter Side View (Samping 3/4)</option>
+            <option value="Side Profile (Tampak Samping Total)">Side Profile (Tampak Samping Total)</option>
+            <option value="Isometric View (Isometrik)">Isometric View (Isometrik)</option>
+            <option value="Close-up Focus">Close-up Focus</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Vector Style Grid Picker -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Pilihan Style Vektor <span class="text-slate-400 font-normal">(12 Opsi)</span>
+          </label>
+          <span id="selectedStyleBadge" class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-100">
+            Terpilih: Kawaii Imut
+          </span>
+        </div>
+        <div id="stylesGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Section: Settings Sidebar & Generated Results -->
+    <div class="lg:col-span-5 space-y-6">
+
+      <!-- Asset Generation Settings Sidebar -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center">
+          <i class="fa-solid fa-sliders text-brand-600 mr-2"></i> Pengaturan Aset Vektor
+        </h3>
+
+        <div class="space-y-3 text-xs font-medium">
+          <div>
+            <label class="block text-slate-600 mb-1">Rasio Aspek Canvas</label>
+            <select id="selectAspectRatio" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none">
+              <option value="1:1">1:1 (Persegi Stok / Stiker)</option>
+              <option value="4:3">4:3 (Lansekap Standar)</option>
+              <option value="16:9">16:9 (Widescreen)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-slate-600 mb-1">Latar Belakang Gambar</label>
+            <select id="selectBackground" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none">
+              <option value="isolated on pure solid white background">Putih Solid Clean</option>
+              <option value="isolated on transparent checkered background">Transparan (Stiker Format)</option>
+              <option value="soft pastel gradient background">Soft Gradient Pastel</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-slate-600 mb-1">
+              <label>Jumlah Gambar Per Batch</label>
+              <span class="font-bold text-brand-600 text-xs">Maksimal 50</span>
+            </div>
+            <input id="inputBatchCount" type="number" min="1" max="50" value="4" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold focus:outline-none">
+          </div>
+
+          <div class="pt-2 border-t border-slate-100">
+            <label class="inline-flex items-center cursor-pointer">
+              <input id="chkStickerBorder" type="checkbox" checked class="rounded border-slate-300 text-brand-600 focus:ring-brand-500 w-4 h-4">
+              <span class="ml-2 text-slate-700 font-semibold text-xs">Tambahkan Outline Stiker Putih (Die-Cut)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generated Results Section -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center">
+            <i class="fa-solid fa-layer-group text-brand-600 mr-2"></i> Hasil Generasi <span id="resultCountBadge" class="ml-1 text-brand-600 font-semibold">(0)</span>
+          </h3>
+          <button id="btnDownloadAll" type="button" class="hidden text-xs font-bold text-brand-600 hover:text-brand-700 items-center space-x-1">
+            <i class="fa-solid fa-file-arrow-down"></i>
+            <span>Unduh Semua</span>
+          </button>
+        </div>
+
+        <!-- Initial Empty State -->
+        <div id="emptyState" class="py-12 text-center space-y-3">
+          <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 text-2xl">
+            <i class="fa-regular fa-image"></i>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-bold text-slate-600">Belum Ada Gambar Dibuat</p>
+            <p class="text-[11px] text-slate-400 max-w-xs mx-auto">Tuliskan instruksi prompt di atas dan klik "Generate Presisi Vector" untuk mulai membuat aset.</p>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden py-12 text-center space-y-3">
+          <div class="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mx-auto"></div>
+          <p id="loadingStatusText" class="text-xs font-bold text-slate-700">Memproses Generasi AI...</p>
+        </div>
+
+        <!-- Generated Assets Grid -->
+        <div id="resultsGrid" class="hidden grid grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-1">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Asset Detail Modal -->
+  <div id="assetModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-100 space-y-4 p-5 relative">
+      <button id="btnModalClose" type="button" class="absolute top-4 right-4 w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold transition">
+        &times;
+      </button>
+      <div class="aspect-square bg-slate-50 rounded-xl overflow-hidden border border-slate-100 flex items-center justify-center p-2">
+        <img id="modalImg" src="" alt="" class="w-full h-full object-contain">
+      </div>
+      <div class="space-y-2 text-xs">
+        <div>
+          <span class="text-slate-400 font-semibold block">Instruksi Prompt:</span>
+          <p id="modalPrompt" class="font-bold text-slate-800"></p>
+        </div>
+        <div>
+          <span class="text-slate-400 font-semibold block">Full Master Prompt:</span>
+          <p id="modalMasterPrompt" class="font-mono text-[10px] text-slate-600 bg-slate-50 p-2 rounded border border-slate-200 break-words"></p>
+        </div>
+        <div class="flex justify-between text-slate-500">
+          <span>Style: <strong id="modalStyle" class="text-slate-800"></strong></span>
+          <span>Palet: <strong id="modalPalette" class="text-slate-800"></strong></span>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <button id="btnModalOpenTab" type="button" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center space-x-1">
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          <span>Buka Tab Baru</span>
+        </button>
+        <button id="btnModalDownload" type="button" class="py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl transition flex items-center justify-center space-x-1">
+          <i class="fa-solid fa-download text-[10px]"></i>
+          <span>Unduh PNG HD</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg transition-all duration-300 transform translate-y-20 opacity-0 flex items-center space-x-2">
+    <i class="fa-solid fa-circle-info text-brand-400"></i>
+    <span id="toastMessage">Notifikasi</span>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    const VECTOR_STYLES = [
+      { id: 'flat', name: 'Vektor Datar (Flat)', tag: 'VECTOR' },
+      { id: 'monoline', name: 'Vektor Monoline', tag: 'VECTOR' },
+      { id: 'kawaii', name: 'Kawaii Imut', tag: 'VECTOR', active: true },
+      { id: 'glossy3d', name: '3D Glossy', tag: 'VECTOR' },
+      { id: 'matte3d', name: '3D Matte', tag: 'VECTOR' },
+      { id: 'sticker', name: 'Stiker', tag: 'VECTOR' },
+      { id: 'isometric', name: 'Vektor Isometrik', tag: 'VECTOR' },
+      { id: 'lowpoly', name: 'Low Poly', tag: 'VECTOR' },
+      { id: 'lineart', name: 'Seni Garis (Line Art)', tag: 'VECTOR' },
+      { id: 'siluet', name: 'Siluet', tag: 'VECTOR' },
+      { id: 'emoji', name: 'Emoji', tag: 'VECTOR' },
+      { id: 'icon', name: 'Ikon', tag: 'VECTOR' }
+    ];
+
+    const SAMPLE_PROMPTS = [
+      "kelinci imut membawa wortel segar dengan mata berbinar ceria",
+      "kucing astronot lucu melayang di luar angkasa dengan helm kaca",
+      "cangkir kopi karakter kartun tersenyum memegang donat manis",
+      "anak anjing corgi bermain bola di taman bunga matahari",
+      "robot kecil ramah menyiram tanaman bunga dalam pot"
+    ];
+
+    let selectedStyle = VECTOR_STYLES.find(s => s.active) || VECTOR_STYLES[2];
+    let selectedPalette = "Default";
+    let isGenerating = false;
+    let generatedAssets = [];
+    let currentActiveAsset = null;
+
+    const stylesGrid = document.getElementById('stylesGrid');
+    const promptInput = document.getElementById('promptInput');
+    const charCounter = document.getElementById('charCounter');
+    const selectedStyleBadge = document.getElementById('selectedStyleBadge');
+    const btnRandomPrompt = document.getElementById('btnRandomPrompt');
+    const btnClearPrompt = document.getElementById('btnClearPrompt');
+    const btnOptimizePrompt = document.getElementById('btnOptimizePrompt');
+    const optimizedPromptBox = document.getElementById('optimizedPromptBox');
+    const optimizedPromptText = document.getElementById('optimizedPromptText');
+    const btnUseOptimizedPrompt = document.getElementById('btnUseOptimizedPrompt');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const btnGenerateText = document.getElementById('btnGenerateText');
+    const resultsGrid = document.getElementById('resultsGrid');
+    const emptyState = document.getElementById('emptyState');
+    const loadingState = document.getElementById('loadingState');
+    const loadingStatusText = document.getElementById('loadingStatusText');
+    const resultCountBadge = document.getElementById('resultCountBadge');
+    const btnDownloadAll = document.getElementById('btnDownloadAll');
+
+    const assetModal = document.getElementById('assetModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalPrompt = document.getElementById('modalPrompt');
+    const modalMasterPrompt = document.getElementById('modalMasterPrompt');
+    const modalStyle = document.getElementById('modalStyle');
+    const modalPalette = document.getElementById('modalPalette');
+    const btnModalClose = document.getElementById('btnModalClose');
+    const btnModalDownload = document.getElementById('btnModalDownload');
+    const btnModalOpenTab = document.getElementById('btnModalOpenTab');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderStyles();
+      setupEventListeners();
+      promptInput.value = "kelinci imut membawa wortel segar dengan mata berbinar ceria";
+      updateCharCount();
+    });
+
+    function renderStyles() {
+      stylesGrid.innerHTML = '';
+      VECTOR_STYLES.forEach(style => {
+        const card = document.createElement('div');
+        const isActive = style.id === selectedStyle.id;
+        card.className = `style-card cursor-pointer border rounded-lg p-2 text-center transition-all relative flex flex-col justify-between bg-slate-50 hover:bg-white hover:shadow-sm ${
+          isActive ? 'active border-brand-500 bg-blue-50/50' : 'border-slate-200'
+        }`;
+        card.onclick = () => {
+          selectedStyle = style;
+          renderStyles();
+          selectedStyleBadge.textContent = `Terpilih: ${style.name}`;
+        };
+        card.innerHTML = `
+          <span class="active-dot absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 ${isActive ? 'block' : 'hidden'}"></span>
+          <div class="text-[11px] font-semibold text-slate-800 truncate mb-0.5">${style.name}</div>
+          <div class="text-[8px] font-bold text-slate-400 uppercase">${style.tag}</div>
+        `;
+        stylesGrid.appendChild(card);
+      });
+    }
+
+    function setupEventListeners() {
+      promptInput.addEventListener('input', updateCharCount);
+
+      document.querySelectorAll('.palette-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active', 'ring-2', 'ring-brand-500'));
+          e.target.classList.add('active', 'ring-2', 'ring-brand-500');
+          selectedPalette = e.target.dataset.palette;
+        });
+      });
+
+      btnRandomPrompt.addEventListener('click', () => {
+        const idx = Math.floor(Math.random() * SAMPLE_PROMPTS.length);
+        promptInput.value = SAMPLE_PROMPTS[idx];
+        updateCharCount();
+      });
+
+      btnClearPrompt.addEventListener('click', () => {
+        promptInput.value = '';
+        updateCharCount();
+      });
+
+      btnOptimizePrompt.addEventListener('click', optimizePrompt);
+
+      btnUseOptimizedPrompt.addEventListener('click', () => {
+        if (optimizedPromptText.textContent) {
+          promptInput.value = optimizedPromptText.textContent;
+          updateCharCount();
+        }
+      });
+
+      btnGenerate.addEventListener('click', startGeneration);
+
+      btnModalClose.addEventListener('click', () => assetModal.classList.add('hidden'));
+
+      if (btnModalOpenTab) {
+        btnModalOpenTab.addEventListener('click', () => {
+          if (currentActiveAsset) window.open(currentActiveAsset.url, '_blank');
+        });
+      }
+
+      btnModalDownload.addEventListener('click', () => {
+        if (currentActiveAsset) downloadImage(currentActiveAsset.url, `${currentActiveAsset.prompt}.png`);
+      });
+
+      btnDownloadAll.addEventListener('click', () => {
+        generatedAssets.forEach((asset, idx) => {
+          setTimeout(() => downloadImage(asset.url, `vektor-${idx + 1}.png`), idx * 300);
+        });
+      });
+    }
+
+    function updateCharCount() {
+      charCounter.textContent = `${promptInput.value.length} karakter`;
+    }
+
+    async function optimizePrompt() {
+      const text = promptInput.value.trim();
+      if (!text) {
+        showToast("Masukkan prompt terlebih dahulu!");
+        return;
+      }
+
+      btnOptimizePrompt.disabled = true;
+      btnOptimizePrompt.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> <span>Memproses Gemini AI...</span>`;
+
+      try {
+        const systemPrompt = "Act as an expert prompt engineer for vector stock illustration generation. Convert the user prompt into a highly detailed English master prompt suitable for clean, high-quality vector stock graphic assets. Keep it concise under 40 words.";
+        const userQuery = `Original prompt: "${text}". Style: ${selectedStyle.name}. Palette: ${selectedPalette}. Angle: ${document.getElementById('selectAngle').value}.`;
+        
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+        
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: userQuery }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] }
+          })
+        });
+        
+        const result = await response.json();
+        const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (generatedText) {
+          optimizedPromptText.textContent = generatedText.trim();
+          optimizedPromptBox.classList.remove('hidden');
+          showToast("Prompt berhasil dioptimalkan dengan Gemini AI!");
+        } else {
+          fallbackPromptOptimization(text);
+        }
+      } catch (err) {
+        console.warn("Gemini API skipped or offline, using prompt helper:", err);
+        fallbackPromptOptimization(text);
+      } finally {
+        btnOptimizePrompt.disabled = false;
+        btnOptimizePrompt.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-xs"></i> <span>Optimalkan Prompt Gemini AI</span>`;
+      }
+    }
+
+    function fallbackPromptOptimization(text) {
+      const angle = document.getElementById('selectAngle').value;
+      optimizedPromptText.textContent = `High-end 2D vector graphic illustration of ${text}, ${selectedStyle.name} aesthetic, ${angle}, vibrant ${selectedPalette} colors, isolated, professional stock asset`;
+      optimizedPromptBox.classList.remove('hidden');
+      showToast("Prompt dioptimalkan!");
+    }
+
+    // Helper to generate dynamic SVG data URI as fallback
+    function generateDynamicVectorSVG(text, styleName, paletteName, index) {
+      const colors = {
+        'Pastel Imut': ['#fbcfe8', '#f472b6', '#ec4899', '#fef08a'],
+        'Vibrant Cerah': ['#38bdf8', '#fbbf24', '#f87171', '#4ade80'],
+        'Monokrom': ['#1e293b', '#475569', '#94a3b8', '#f8fafc'],
+        'Neon Cyberpunk': ['#c084fc', '#f43f5e', '#06b6d4', '#e0e7ff'],
+        'Earthy Tone': ['#059669', '#d97706', '#84cc16', '#fef3c7'],
+        'Default': ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd']
+      }[paletteName] || ['#2563eb', '#3b82f6', '#60a5fa', '#f3f4f6'];
+
+      const c1 = colors[0], c2 = colors[1], c3 = colors[2], c4 = colors[3];
+      const svgStr = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+        <rect width="512" height="512" rx="32" fill="#f8fafc"/>
+        <circle cx="256" cy="256" r="200" fill="${c1}" opacity="0.15"/>
+        <circle cx="256" cy="230" r="140" fill="${c2}" opacity="0.85"/>
+        <path d="M 180 340 Q 256 420 332 340 Z" fill="${c3}"/>
+        <circle cx="210" cy="210" r="22" fill="#ffffff"/>
+        <circle cx="302" cy="210" r="22" fill="#ffffff"/>
+        <circle cx="210" cy="210" r="10" fill="#0f172a"/>
+        <circle cx="302" cy="210" r="10" fill="#0f172a"/>
+        <path d="M 230 260 Q 256 280 282 260" stroke="#0f172a" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <rect x="90" y="420" width="332" height="48" rx="24" fill="${c4}"/>
+        <text x="256" y="450" font-family="sans-serif" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="middle">${text.slice(0, 25)} (${index})</text>
+        <text x="256" y="70" font-family="sans-serif" font-size="14" font-weight="600" fill="${c1}" text-anchor="middle">${styleName.toUpperCase()}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgStr);
+    }
+
+    async function generateSingleGeminiImage(fullPrompt, aspectRatioVal, seedOffset) {
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [{
+          role: 'user',
+          parts: [{ text: `${fullPrompt}. High precision vector graphic variation #${seedOffset}` }]
+        }],
+        generationConfig: {
+          responseModalities: ['IMAGE'],
+          imageConfig: { aspectRatio: aspectRatioVal }
+        }
+      };
+
+      try {
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (part && part.inlineData?.data) {
+          const mime = part.inlineData.mimeType || 'image/png';
+          return `data:${mime};base64,${part.inlineData.data}`;
+        }
+      } catch (e) {
+        console.warn("Gemini API call bypassed or unreachable, using fallback engine:", e);
+      }
+
+      // Secondary Pollinations Fallback
+      try {
+        const currentSeed = Math.floor(Math.random() * 899999) + 100000 + seedOffset;
+        const encodedPrompt = encodeURIComponent(`${fullPrompt}, clean 2d vector graphic asset, seed ${seedOffset}`);
+        return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${currentSeed}&nologo=true&model=flux`;
+      } catch (err) {
+        // Tertiary Dynamic SVG Fallback
+        return generateDynamicVectorSVG(fullPrompt, selectedStyle.name, selectedPalette, seedOffset);
+      }
+    }
+
+    async function startGeneration() {
+      const text = promptInput.value.trim();
+      if (!text) {
+        showToast("Masukkan prompt terlebih dahulu!");
+        return;
+      }
+
+      const count = Math.min(Math.max(parseInt(document.getElementById('inputBatchCount').value) || 4, 1), 50);
+      const angle = document.getElementById('selectAngle').value;
+      const bg = document.getElementById('selectBackground').value;
+      const aspectRatioVal = document.getElementById('selectAspectRatio').value || "1:1";
+      const isSticker = document.getElementById('chkStickerBorder').checked;
+
+      isGenerating = true;
+      btnGenerate.disabled = true;
+      emptyState.classList.add('hidden');
+      resultsGrid.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+
+      generatedAssets = [];
+      resultsGrid.innerHTML = '';
+
+      const stickerTag = isSticker ? "thick white die-cut sticker outline" : "";
+      const masterPrompt = `Cute vector graphics of ${text}, ${selectedStyle.name} style, ${angle}, ${selectedPalette} palette, ${stickerTag}, clean vector art, ${bg}`;
+
+      loadingStatusText.textContent = `Memproses Vektor AI (0/${count})...`;
+      btnGenerateText.textContent = `Memproses Batch (${count})`;
+
+      const promises = [];
+      for (let i = 1; i <= count; i++) {
+        promises.push(
+          (async () => {
+            const imgUrl = await generateSingleGeminiImage(masterPrompt, aspectRatioVal, i);
+            generatedAssets.push({
+              id: `asset-${i}`,
+              prompt: text,
+              masterPrompt: masterPrompt,
+              style: selectedStyle.name,
+              palette: selectedPalette,
+              seed: i,
+              url: imgUrl
+            });
+            loadingStatusText.textContent = `Memproses Vektor AI (${generatedAssets.length}/${count})...`;
+          })()
+        );
+      }
+
+      await Promise.all(promises);
+
+      renderResults();
+
+      isGenerating = false;
+      btnGenerate.disabled = false;
+      btnGenerateText.textContent = "Generate Presisi Vector";
+      loadingState.classList.add('hidden');
+      resultsGrid.classList.remove('hidden');
+      btnDownloadAll.classList.remove('hidden');
+      btnDownloadAll.classList.add('flex');
+      resultCountBadge.textContent = `(${generatedAssets.length})`;
+      showToast(`Berhasil! ${generatedAssets.length} aset gambar telah dibuat!`);
+    }
+
+    function renderResults() {
+      resultsGrid.innerHTML = '';
+      generatedAssets.forEach((asset) => {
+        const card = document.createElement('div');
+        card.className = 'group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col relative';
+
+        card.innerHTML = `
+          <div class="relative aspect-square bg-slate-50 overflow-hidden cursor-pointer flex items-center justify-center p-2">
+            <img src="${asset.url}" alt="${asset.prompt}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
+          </div>
+          <div class="p-3 bg-white flex flex-col justify-between flex-1 border-t border-slate-100 space-y-2">
+            <div>
+              <div class="text-xs font-bold text-slate-800 truncate">${asset.prompt}</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">${asset.style}</div>
+            </div>
+            <button type="button" class="btn-dl w-full py-1.5 bg-slate-100 hover:bg-brand-50 hover:text-brand-600 text-slate-700 font-semibold text-[11px] rounded-lg transition-colors flex items-center justify-center space-x-1 border border-slate-200 active:scale-95">
+              <i class="fa-solid fa-download text-[10px]"></i>
+              <span>Unduh PNG</span>
+            </button>
+          </div>
+        `;
+
+        card.querySelector('img').onclick = () => openModal(asset);
+        card.querySelector('.btn-dl').onclick = (e) => {
+          e.stopPropagation();
+          downloadImage(asset.url, `${asset.prompt}.png`);
+        };
+
+        resultsGrid.appendChild(card);
+      });
+    }
+
+    function openModal(asset) {
+      currentActiveAsset = asset;
+      modalImg.src = asset.url;
+      modalPrompt.textContent = asset.prompt;
+      modalMasterPrompt.textContent = asset.masterPrompt;
+      modalStyle.textContent = asset.style;
+      modalPalette.textContent = asset.palette;
+      assetModal.classList.remove('hidden');
+    }
+
+    async function downloadImage(url, filename) {
+      showToast("Mengunduh gambar...");
+      try {
+        if (url.startsWith('data:')) {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename || 'gambar-vektor.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast("Gambar berhasil diunduh!");
+        } else {
+          // Cross-origin image handling with Canvas Blob fallback
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth || 512;
+            canvas.height = img.naturalHeight || 512;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            try {
+              const dataUrl = canvas.toDataURL('image/png');
+              const a = document.createElement('a');
+              a.href = dataUrl;
+              a.download = filename || 'gambar-vektor.png';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              showToast("Gambar berhasil diunduh!");
+            } catch (e) {
+              window.open(url, '_blank');
+            }
+          };
+          img.onerror = () => {
+            window.open(url, '_blank');
+          };
+          img.src = url;
+        }
+      } catch (err) {
+        window.open(url, '_blank');
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
 </body>
 </html>
